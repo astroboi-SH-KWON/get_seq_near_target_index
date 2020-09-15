@@ -147,8 +147,8 @@ class Logics:
                 print(str(mut_arr))
 
             seq_record = SeqIO.read(path + "chr" + chr_num + ".fa", "fasta")
-            p_seq = str(seq_record.seq)
-            m_seq = str(seq_record.seq.complement())
+            p_seq = str(seq_record.seq).upper()
+            m_seq = str(seq_record.seq.complement()).upper()
 
             ori_win_flag = True
 
@@ -176,8 +176,4 @@ class Logics:
 
                 logic_prep.add_result_seq_to_arr(mut_arr, mut_p_dict)
                 logic_prep.add_result_seq_to_arr(mut_arr, mut_m_dict)
-
-
-
-
 

@@ -99,8 +99,8 @@ def get_seq_by_pam_after_mut(mut_list):
             print(str(mut_arr))
 
         seq_record = SeqIO.read(REF_DIR + "chr" + chr_num + ".fa", "fasta")
-        p_seq = str(seq_record.seq)
-        m_seq = str(seq_record.seq.complement())
+        p_seq = str(seq_record.seq).upper()
+        m_seq = str(seq_record.seq.complement()).upper()
 
         ori_win_flag = True
 
