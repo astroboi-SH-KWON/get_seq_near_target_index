@@ -1,0 +1,129 @@
+import time
+import os
+from Bio import SeqIO
+import multiprocessing as mp
+import numpy as np
+
+import Util
+import Logic
+import LogicPrep
+############### start to set env ################
+WORK_DIR = os.getcwd() + "/"
+# REF_DIR = "D:/000_WORK/000_reference_path/human/hg38/Splited/"
+REF_DIR = "/media/hkim/Pipeline/project_by_astroboi_2200/hg38/"
+PROJECT_NAME = WORK_DIR.split("/")[-2]
+MUT_INFO = "200907_Dominant filter.txt"
+
+OTHOLOG = ['SaCas9', 'SaCas9_KKH', 'SaCas9_NNG', 'St1Cas9', 'Nm1Cas9', 'Nm2Cas9', 'CjCas9']
+PAMS = ['NNGRRT', 'NNNRRT', 'NNG', 'NNRGAA', 'NNNNGATT', 'NNNNCC', 'NNNNRYAC']
+SEQ_F_PAM = [43, 43, 43, 41, 45, 44, 44]
+SEQ_B_PAM = [3, 3, 3, 3, 3, 3, 3]
+WIN_SIZE = [60, 60]
+
+INIT = [OTHOLOG, PAMS, SEQ_F_PAM, SEQ_B_PAM]
+
+TOTAL_CPU = mp.cpu_count()
+MULTI_CNT = int(TOTAL_CPU*0.8)
+############### end setting env #################
+
+
+
+def multi_processing():
+    logic_prep = LogicPrep.LogicPreps()
+    util = Util.Utils()
+
+    # CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+    # POS - 1 = index of .fa sequence
+    # [['1', '1338000', '208047', 'CT', 'C', '.', '.', '"ALLELEID=204306;CLNDISDB=MONDO:MONDO:0014591,MedGen:C4225363,OMIM:616331;CLNDN=Robinow_syndrome,_autosomal_dominant_2;CLNHGVS=NC_000001.11:g.1338001del;CLNREVSTAT=criteria_provided,_single_submitter;CLNSIG=Pathogenic;CLNVC=Deletion;CLNVCSO=SO:0000159;GENEINFO=DVL1:1855;MC=SO:0001589|frameshift_variant;ORIGIN=33;RS=797044837"'],...]
+    mut_list = util.read_csv_ignore_N_line(WORK_DIR + "input/" + MUT_INFO, "\t")
+
+    splited_mut_list = np.array_split(mut_list, MULTI_CNT)
+
+    print("total cpu_count : " + str(TOTAL_CPU))
+    print("will use : " + str(MULTI_CNT))
+    pool = mp.Pool(processes=MULTI_CNT)
+
+    pool_list = pool.map(get_seq_by_pam_after_mut, splited_mut_list)
+
+    result_list = logic_prep.merge_multi_list(pool_list)
+
+    header = ['#CHROM',	'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'P_REF_SEQ_[' + str(WIN_SIZE[0]) + '], M_REF_SEQ_[' + str(WIN_SIZE[1]), 'SaCas9+', 'SaCas9-', 'SaCas9_KKH+', 'SaCas9_KKH-', 'SaCas9_NNG+', 'SaCas9_NNG-', 'St1Cas9+', 'St1Cas9-', 'Nm1Cas9+', 'Nm1Cas9-', 'Nm2Cas9+', 'Nm2Cas9-', 'CjCas9+', 'CjCas9-']
+    util.make_excel(WORK_DIR + "output/HY_result", header, result_list)
+
+
+def get_seq_by_pam_after_mut(mut_list):
+    print("multi_processing ::: get_seq_by_pam_after_mut >>> ")
+    result_list = []
+    logic_prep = LogicPrep.LogicPreps()
+    logic = Logic.Logics()
+
+    win_arr = WIN_SIZE
+    init = INIT
+
+    pam_arr = init[1]
+    len_f_pam_arr = init[2]
+    len_b_pam_arr = init[3]
+
+    for mut_arr in mut_list:
+        tmp_arr = []
+        tmp_arr.extend(mut_arr)
+        chr_num = mut_arr[0]
+        pos = int(mut_arr[1]) - 1
+        ref_p_seq = mut_arr[3]
+        ref_m_seq = logic_prep.make_complement_string(ref_p_seq)
+        alt_p_seq = mut_arr[4]
+        alt_m_seq = logic_prep.make_complement_string(alt_p_seq)
+
+        seq_record = SeqIO.read(REF_DIR + "chr" + chr_num + ".fa", "fasta")
+        p_seq = str(seq_record.seq)
+        m_seq = str(seq_record.seq.complement())
+
+        ori_win_flag = True
+
+        for idx in range(len(pam_arr)):
+            pam = pam_arr[idx]
+            len_f_pam = len_f_pam_arr[idx]
+            len_b_pam = len_b_pam_arr[idx]
+
+            ref_p_dict, p_ori_win_seq = logic.get_matched_pam_p_seq_dict(p_seq, pos, win_arr, ref_p_seq, pam,
+                                                                         len_f_pam, len_b_pam)
+            ref_m_dict, m_ori_win_seq = logic.get_matched_pam_m_seq_dict(m_seq, pos, win_arr, ref_m_seq, pam,
+                                                                         len_f_pam, len_b_pam)
+
+            mut_p_dict, _ = logic.get_matched_pam_p_seq_dict(p_seq, pos, win_arr, alt_p_seq, pam, len_f_pam,
+                                                             len_b_pam)
+            mut_m_dict, _ = logic.get_matched_pam_m_seq_dict(m_seq, pos, win_arr, alt_m_seq, pam, len_f_pam,
+                                                             len_b_pam)
+
+            logic.remove_dict_val_by_key(mut_p_dict, ref_p_dict.keys())
+            logic.remove_dict_val_by_key(mut_m_dict, ref_m_dict.keys())
+
+            if ori_win_flag:
+                tmp_arr.append(p_ori_win_seq + " , " + m_ori_win_seq)
+                ori_win_flag = False
+
+            logic_prep.add_result_seq_to_arr(tmp_arr, mut_p_dict)
+            logic_prep.add_result_seq_to_arr(tmp_arr, mut_m_dict)
+
+        result_list.append(tmp_arr)
+    return result_list
+
+def main():
+    logic = Logic.Logics()
+    util = Util.Utils()
+
+    # CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+    # POS - 1 = index of .fa sequence
+    # [['1', '1338000', '208047', 'CT', 'C', '.', '.', '"ALLELEID=204306;CLNDISDB=MONDO:MONDO:0014591,MedGen:C4225363,OMIM:616331;CLNDN=Robinow_syndrome,_autosomal_dominant_2;CLNHGVS=NC_000001.11:g.1338001del;CLNREVSTAT=criteria_provided,_single_submitter;CLNSIG=Pathogenic;CLNVC=Deletion;CLNVCSO=SO:0000159;GENEINFO=DVL1:1855;MC=SO:0001589|frameshift_variant;ORIGIN=33;RS=797044837"'],...]
+    mut_list = util.read_csv_ignore_N_line(WORK_DIR + "input/" + MUT_INFO, "\t")
+
+    logic.get_seq_by_pam_after_mut(REF_DIR, mut_list, WIN_SIZE, INIT)
+
+    header = ['#CHROM',	'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'P_REF_SEQ_[' + str(WIN_SIZE[0]) + '], M_REF_SEQ_[' + str(WIN_SIZE[1]), 'SaCas9+', 'SaCas9-', 'SaCas9_KKH+', 'SaCas9_KKH-', 'SaCas9_NNG+', 'SaCas9_NNG-', 'St1Cas9+', 'St1Cas9-', 'Nm1Cas9+', 'Nm1Cas9-', 'Nm2Cas9+', 'Nm2Cas9-', 'CjCas9+', 'CjCas9-']
+    util.make_excel(WORK_DIR + "output/HY_result", header, mut_list)
+
+if __name__ == '__main__':
+    start_time = time.perf_counter()
+    print("start [ " + PROJECT_NAME + " ]>>>>>>>>>>>>>>>>>>")
+    multi_processing()
+    print("::::::::::: %.2f seconds ::::::::::::::" % (time.perf_counter() - start_time))
