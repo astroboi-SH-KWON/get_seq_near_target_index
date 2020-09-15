@@ -104,7 +104,7 @@ def test():
     result_list = get_PAM_within_N_bp_of_POS(mut_list)
 
     header = ['CHROM', 'PAM', str(SEQ_WIN_SIZE[0]) + ' + PAM + ' + str(SEQ_WIN_SIZE[1]), 'PAM_POS', 'STRAND']
-    util.make_excel(WORK_DIR + "output/ClinVar_hg38_result", header, result_list)
+    util.make_excel(WORK_DIR + "output/ClinVar_hg38_test_result", header, result_list)
 
 if __name__ == '__main__':
     start_time = time.perf_counter()
