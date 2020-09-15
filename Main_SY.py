@@ -3,14 +3,21 @@ import os
 from Bio import SeqIO
 import multiprocessing as mp
 import numpy as np
+import platform
 
 import Util
 import Logic
 import LogicPrep
 ############### start to set env ################
 WORK_DIR = os.getcwd() + "/"
-# REF_DIR = "D:/000_WORK/000_reference_path/human/hg38/Splited/"
-REF_DIR = "/media/hkim/Pipeline/project_by_astroboi_2200/hg38/"
+SYSTEM_NM = platform.system()
+if SYSTEM_NM == 'Linux':
+    # REAL
+    REF_DIR = "/media/hkim/Pipeline/project_by_astroboi_2200/hg38/"
+else:
+    # DEV
+    REF_DIR = "D:/000_WORK/000_reference_path/human/hg38/Splited/"
+
 PROJECT_NAME = WORK_DIR.split("/")[-2]
 MUT_INFO = "200907_Dominant filter.txt"
 
@@ -35,12 +42,17 @@ def multi_processing():
     # CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
     # POS - 1 = index of .fa sequence
     # [['1', '1338000', '208047', 'CT', 'C', '.', '.', '"ALLELEID=204306;CLNDISDB=MONDO:MONDO:0014591,MedGen:C4225363,OMIM:616331;CLNDN=Robinow_syndrome,_autosomal_dominant_2;CLNHGVS=NC_000001.11:g.1338001del;CLNREVSTAT=criteria_provided,_single_submitter;CLNSIG=Pathogenic;CLNVC=Deletion;CLNVCSO=SO:0000159;GENEINFO=DVL1:1855;MC=SO:0001589|frameshift_variant;ORIGIN=33;RS=797044837"'],...]
-    mut_list = util.read_csv_ignore_N_line(WORK_DIR + "input/" + MUT_INFO, "\t")
+    mut_list = []
+    if SYSTEM_NM == 'Linux':
+        mut_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/" + MUT_INFO, "\t"))
+    else:
+        mut_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/" + MUT_INFO, "\t")[:300])
 
     splited_mut_list = np.array_split(mut_list, MULTI_CNT)
 
-    print("total cpu_count : " + str(TOTAL_CPU))
-    print("will use : " + str(MULTI_CNT))
+    print("platform.system() : ", SYSTEM_NM)
+    print("total cpu_count : ", str(TOTAL_CPU))
+    print("will use : ", str(MULTI_CNT))
     pool = mp.Pool(processes=MULTI_CNT)
 
     pool_list = pool.map(get_seq_by_pam_after_mut, splited_mut_list)
@@ -70,9 +82,21 @@ def get_seq_by_pam_after_mut(mut_list):
         chr_num = mut_arr[0]
         pos = int(mut_arr[1]) - 1
         ref_p_seq = mut_arr[3]
-        ref_m_seq = logic_prep.make_complement_string(ref_p_seq)
         alt_p_seq = mut_arr[4]
-        alt_m_seq = logic_prep.make_complement_string(alt_p_seq)
+
+        ref_m_seq = ""
+        alt_m_seq = ""
+        try:
+            ref_m_seq += logic.make_complement_string(ref_p_seq)
+            if alt_p_seq == '.':
+                alt_p_seq = ""
+            else:
+                alt_m_seq += logic.make_complement_string(alt_p_seq)
+        except Exception as err:
+            print("make_complement_string ::: ", err)
+            print(ref_p_seq, " : ref_p_seq")
+            print(alt_p_seq, " : alt_p_seq")
+            print(str(mut_arr))
 
         seq_record = SeqIO.read(REF_DIR + "chr" + chr_num + ".fa", "fasta")
         p_seq = str(seq_record.seq)
@@ -106,6 +130,7 @@ def get_seq_by_pam_after_mut(mut_list):
             logic_prep.add_result_seq_to_arr(tmp_arr, mut_m_dict)
 
         result_list.append(tmp_arr)
+    print("DONE multi_processing ::: get_seq_by_pam_after_mut >>>")
     return result_list
 
 def main():

@@ -7,6 +7,23 @@ class Logics:
     def __init__(self):
         pass
 
+    def complement_char(self, ch):
+        complement_char_dict = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', 'N': 'N'}
+        try:
+            return complement_char_dict[ch]
+        except:
+            print("complement_char : [" + ch + "]")
+            raise Exception
+
+    def make_complement_string(self, trgt_seq):
+        comp_seq = ""
+        for ch in trgt_seq:
+            try:
+                comp_seq += self.complement_char(ch)
+            except:
+                raise Exception
+        return comp_seq
+
     """
     checkSeqByChar : match sequences by char
     :param
@@ -29,7 +46,7 @@ class Logics:
             if seq_char in 'CT':
                 return True
         """
-        add more rules of "ACTGU"
+        add more rules of "ACGTU"
         """
 
         return flag
@@ -113,9 +130,21 @@ class Logics:
             chr_num = mut_arr[0]
             pos = int(mut_arr[1]) - 1
             ref_p_seq = mut_arr[3]
-            ref_m_seq = logic_prep.make_complement_string(ref_p_seq)
             alt_p_seq = mut_arr[4]
-            alt_m_seq = logic_prep.make_complement_string(alt_p_seq)
+
+            ref_m_seq = ""
+            alt_m_seq = ""
+            try:
+                ref_m_seq += self.make_complement_string(ref_p_seq)
+                if alt_p_seq == '.':
+                    alt_p_seq = ""
+                else:
+                    alt_m_seq += self.make_complement_string(alt_p_seq)
+            except Exception as err:
+                print("make_complement_string ::: ", err)
+                print(ref_p_seq, " : ref_p_seq")
+                print(alt_p_seq, " : alt_p_seq")
+                print(str(mut_arr))
 
             seq_record = SeqIO.read(path + "chr" + chr_num + ".fa", "fasta")
             p_seq = str(seq_record.seq)

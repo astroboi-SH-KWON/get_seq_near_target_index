@@ -39,14 +39,6 @@ class LogicPreps:
 
         return result_dict
 
-    def complement_char(self, ch):
-        return {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}[ch]
-
-    def make_complement_string(self, trgt_seq):
-        comp_seq = ""
-        for ch in trgt_seq:
-            comp_seq += self.complement_char(ch)
-        return comp_seq
 
     def add_result_seq_to_arr(self, mut_arr, data_dict):
         tmp_str = ""

@@ -19,7 +19,7 @@ PROJECT_NAME = WORK_DIR.split("/")[-2]
 CDS_INFO = "hg38_refFlat_full.txt"
 MUT_INFO = "20200909_ClinVar_hg38.txt"
 
-TRGT_IDX = 26696421
+TRGT_IDX = 686651
 
 
 
