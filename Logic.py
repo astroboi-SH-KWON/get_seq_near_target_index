@@ -114,6 +114,41 @@ class Logics:
 
         return result_dict, m_ori_win_seq[::-1]
 
+    def get_matched_pam_p_seq_list(self, result_list, p_seq, pos, pam, win_pam, seq_win_size, chr):
+        win_pam_f_pos = win_pam[0]
+        win_pam_b_pos = win_pam[1]
+
+        len_f_pam = seq_win_size[0]
+        len_b_pam = seq_win_size[1]
+
+        p_seq_pam_win = p_seq[pos - win_pam_f_pos: pos + win_pam_b_pos]
+        p_pam_pos = pos - win_pam_f_pos
+
+        for i in range(len(p_seq_pam_win) - len(pam) + 1):
+            candi_pam = p_seq_pam_win[i: i + len(pam)]
+            if self.match(0, candi_pam, pam):
+                result_list.append(
+                    [chr, candi_pam, p_seq[p_pam_pos - len_f_pam: p_pam_pos + len(pam) + len_b_pam], p_pam_pos, '+'])
+            p_pam_pos += 1
+
+    def get_matched_pam_m_seq_list(self, result_list, m_seq, pos, pam, win_pam, seq_win_size, chr):
+        win_pam_f_pos = win_pam[0]
+        win_pam_b_pos = win_pam[1]
+
+        len_f_pam = seq_win_size[0]
+        len_b_pam = seq_win_size[1]
+
+        m_seq_pam_win = m_seq[pos - win_pam_b_pos: pos + win_pam_f_pos]
+        m_pam_pos = pos - win_pam_b_pos
+
+        for i in range(len(m_seq_pam_win) - len(pam) + 1):
+            candi_pam = m_seq_pam_win[i: i + len(pam)]
+            if self.match(0, candi_pam, pam[::-1]):
+                result_list.append(
+                    [chr, candi_pam[::-1], m_seq[m_pam_pos - len_b_pam: m_pam_pos + len(pam) + len_f_pam][::-1],
+                     m_pam_pos + len(pam), '-'])
+            m_pam_pos += 1
+
     def remove_dict_val_by_key(self, trgt_dict, keys):
         for tmp_key in keys:
             if tmp_key in trgt_dict:
