@@ -111,10 +111,10 @@ class Logics:
             if self.match_SY(0, p_ref_pam_seq, pam):
                 p_seq_f_pam = p_ori_win_seq[i + p_first_pam_pos - len_f_pam: i + p_first_pam_pos]
                 p_seq_b_pam = p_ori_win_seq[i + p_first_pam_pos + len_pam: i + p_first_pam_pos + len_pam + len_b_pam]
-                if p_seq_f_pam + p_ref_pam_seq in result_dict:
-                    result_dict[p_seq_f_pam + p_ref_pam_seq].append(p_seq_f_pam + p_ref_pam_seq + p_seq_b_pam)
+                if p_seq_f_pam in result_dict:
+                    result_dict[p_seq_f_pam].append(p_seq_f_pam + p_ref_pam_seq + p_seq_b_pam)
                 else:
-                    result_dict.update({p_seq_f_pam + p_ref_pam_seq: [p_seq_f_pam + p_ref_pam_seq + p_seq_b_pam]})
+                    result_dict.update({p_seq_f_pam: [p_seq_f_pam + p_ref_pam_seq + p_seq_b_pam]})
 
         return result_dict, p_ori_win_seq
 
@@ -134,10 +134,10 @@ class Logics:
             if self.match_SY(0, m_ref_pam_seq, pam[::-1]):
                 m_seq_f_pam = m_ori_win_seq[i + m_first_pam_pos + len_pam: i + m_first_pam_pos + len_pam + len_f_pam]
                 m_seq_b_pam = m_ori_win_seq[i + m_first_pam_pos - len_b_pam: i + m_first_pam_pos]
-                if (m_ref_pam_seq + m_seq_f_pam)[::-1] in result_dict:
-                    result_dict[(m_ref_pam_seq + m_seq_f_pam)[::-1]].append((m_seq_b_pam + m_ref_pam_seq + m_seq_f_pam)[::-1])
+                if m_seq_f_pam[::-1] in result_dict:
+                    result_dict[m_seq_f_pam[::-1]].append((m_seq_b_pam + m_ref_pam_seq + m_seq_f_pam)[::-1])
                 else:
-                    result_dict.update({(m_ref_pam_seq + m_seq_f_pam)[::-1]: [(m_seq_b_pam + m_ref_pam_seq + m_seq_f_pam)[::-1]]})
+                    result_dict.update({m_seq_f_pam[::-1]: [(m_seq_b_pam + m_ref_pam_seq + m_seq_f_pam)[::-1]]})
 
         return result_dict, m_ori_win_seq[::-1]
 

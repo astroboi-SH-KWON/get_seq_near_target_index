@@ -13,7 +13,7 @@ WORK_DIR = os.getcwd() + "/"
 SYSTEM_NM = platform.system()
 if SYSTEM_NM == 'Linux':
     # REAL
-    REF_DIR = "/media/hkim/Pipeline/project_by_astroboi_2200/hg38/"
+    REF_DIR = "../hg38/"
 else:
     # DEV
     REF_DIR = "D:/000_WORK/000_reference_path/human/hg38/Splited/"
@@ -60,7 +60,7 @@ def multi_processing():
     result_list = logic_prep.merge_multi_list(pool_list)
 
     header = ['#CHROM',	'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'P_REF_SEQ_[' + str(WIN_SIZE[0]) + '], M_REF_SEQ_[' + str(WIN_SIZE[1]), 'SaCas9+', 'SaCas9-', 'SaCas9_KKH+', 'SaCas9_KKH-', 'SaCas9_NNG+', 'SaCas9_NNG-', 'St1Cas9+', 'St1Cas9-', 'Nm1Cas9+', 'Nm1Cas9-', 'Nm2Cas9+', 'Nm2Cas9-', 'CjCas9+', 'CjCas9-']
-    util.make_excel(WORK_DIR + "output/SY_Dominant_result", header, result_list)
+    util.make_excel(WORK_DIR + "output/SY_Dominant_result_by_spacer", header, result_list)
 
 
 def get_seq_by_pam_after_mut(mut_list):
@@ -145,7 +145,7 @@ def main():
     logic.get_seq_by_pam_after_mut(REF_DIR, mut_list, WIN_SIZE, INIT)
 
     header = ['#CHROM',	'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'P_REF_SEQ_[' + str(WIN_SIZE[0]) + '], M_REF_SEQ_[' + str(WIN_SIZE[1]), 'SaCas9+', 'SaCas9-', 'SaCas9_KKH+', 'SaCas9_KKH-', 'SaCas9_NNG+', 'SaCas9_NNG-', 'St1Cas9+', 'St1Cas9-', 'Nm1Cas9+', 'Nm1Cas9-', 'Nm2Cas9+', 'Nm2Cas9-', 'CjCas9+', 'CjCas9-']
-    util.make_excel(WORK_DIR + "output/SY_Dominant_test_result", header, mut_list)
+    util.make_excel(WORK_DIR + "output/SY_Dominant_test_result_by_spacer", header, mut_list)
 
 if __name__ == '__main__':
     start_time = time.perf_counter()
