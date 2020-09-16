@@ -51,6 +51,25 @@ class Logics:
 
         return flag
 
+    def checkSeqByChar_SY(self, seq_char, target_char):
+        flag = False
+        if target_char == 'N' or seq_char == 'N':
+            return True
+        elif target_char in 'ACGTU':
+            if seq_char == target_char:
+                return True
+        elif target_char == 'R':
+            if seq_char in 'AG':
+                return True
+        elif target_char == 'Y':
+            if seq_char in 'CT':
+                return True
+        """
+        add more rules of "ACGTU"
+        """
+
+        return flag
+
     """
     match : match sequence with "same length" strings
     :param
@@ -68,6 +87,14 @@ class Logics:
         else:
             return False
 
+    def match_SY(self, i, seq_str, rule_str):
+        if len(seq_str) == i:
+            return True
+        if self.checkSeqByChar_SY(seq_str[i], rule_str[i]):
+            return self.match_SY(i + 1, seq_str, rule_str)
+        else:
+            return False
+
     def get_matched_pam_p_seq_dict(self, p_seq, pos, win_arr, ref_seq, pam, len_f_pam, len_b_pam):
         result_dict = {}
         len_pam = len(pam)
@@ -81,7 +108,7 @@ class Logics:
 
         for i in range(len_pam + len_ref_seq - 1):
             p_ref_pam_seq = p_ori_win_seq[i + p_first_pam_pos: i + p_first_pam_pos + len_pam]
-            if self.match(0, p_ref_pam_seq, pam):
+            if self.match_SY(0, p_ref_pam_seq, pam):
                 p_seq_f_pam = p_ori_win_seq[i + p_first_pam_pos - len_f_pam: i + p_first_pam_pos]
                 p_seq_b_pam = p_ori_win_seq[i + p_first_pam_pos + len_pam: i + p_first_pam_pos + len_pam + len_b_pam]
                 if p_seq_f_pam + p_ref_pam_seq in result_dict:
@@ -104,7 +131,7 @@ class Logics:
 
         for i in range(len_pam + len_ref_seq - 1):
             m_ref_pam_seq = m_ori_win_seq[i + m_first_pam_pos: i + m_first_pam_pos + len_pam]
-            if self.match(0, m_ref_pam_seq, pam[::-1]):
+            if self.match_SY(0, m_ref_pam_seq, pam[::-1]):
                 m_seq_f_pam = m_ori_win_seq[i + m_first_pam_pos + len_pam: i + m_first_pam_pos + len_pam + len_f_pam]
                 m_seq_b_pam = m_ori_win_seq[i + m_first_pam_pos - len_b_pam: i + m_first_pam_pos]
                 if (m_ref_pam_seq + m_seq_f_pam)[::-1] in result_dict:
