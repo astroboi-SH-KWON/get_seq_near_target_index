@@ -33,10 +33,7 @@ class Utils:
                 result_list.append(tmp_line.split(deli_str))
         return result_list
 
-    def get_seq_record_from_genbank(self, path):
-        return SeqIO.read(path, "genbank")
-
-    def make_row(self, sheet, row, data_arr, col=1):
+    def make_excel_row(self, sheet, row, data_arr, col=1):
         for idx in range(len(data_arr)):
             sheet.cell(row=row, column=(col + idx), value=data_arr[idx])
 
@@ -45,10 +42,19 @@ class Utils:
         sheet = workbook.active
 
         row = 1
-        self.make_row(sheet, row, header[strt_idx:])
+        self.make_excel_row(sheet, row, header[strt_idx:])
 
         for data_arr in data_list:
             row += 1
-            self.make_row(sheet, row, data_arr[strt_idx:])
+            self.make_excel_row(sheet, row, data_arr[strt_idx:])
 
         workbook.save(filename=path + self.ext_xlsx)
+
+    """
+    :param
+        path : file path with ext
+        f_format : file format (ex : fasta, genbak...)
+    """
+    def read_file_by_biopython(self, path, f_format):
+        seq_record = SeqIO.read(path, f_format)
+        return str(seq_record.seq).upper(), str(seq_record.seq.complement()).upper()

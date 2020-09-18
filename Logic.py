@@ -5,7 +5,8 @@ from Bio.SubsMat.MatrixInfo import blosum62
 import LogicPrep
 class Logics:
     def __init__(self):
-        pass
+        self.strt_cd_arr = ['ATG']
+        self.end_cd_arr = ['TGA', 'TAG', 'TAA']
 
     def complement_char(self, ch):
         complement_char_dict = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', 'N': 'N'}
@@ -238,4 +239,15 @@ class Logics:
 
                 logic_prep.add_result_seq_to_arr(mut_arr, mut_p_dict)
                 logic_prep.add_result_seq_to_arr(mut_arr, mut_m_dict)
+
+    def is_all_bigger_than_cut_off(self, int_list, cut_off=0):
+        return all(i > cut_off for i in int_list)
+
+    def exist_another_orf_end_codon_in_cds_seq(self, cds_seq):
+        codons_wo_last_cd_list = [cds_seq[i * 3:(i + 1) * 3] for i in range(int(len(cds_seq) / 3 - 1))]
+        for end_cd in self.end_cd_arr:
+            if end_cd in codons_wo_last_cd_list:
+                return True
+        return False
+
 
