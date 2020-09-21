@@ -135,7 +135,7 @@ def make_filtered_hg38_refFlat():
     result_list = logic_prep.merge_multi_list(pool_cds_idx_list)
 
     header = ['GeneSym', 'NMID', 'Chrom', 'Strand', 'Transcript_Start', 'End', 'ORFStart', 'End', '#Exon', 'ExonS_list',
-              'ExonE_list']
+              'ExonE_list', 'int(NMID)']
     util.make_excel(WORK_DIR + "output/filtered_hg38_refFlat", header, result_list)
 
 
@@ -163,11 +163,9 @@ def filter_out_cds_wout_strt_cdn(cds_list):
                 if end_codon in END_CD_ARR:
                     start_idx_arr, end_idx_arr = logic_prep.get_orf_strt_end_idx_arr(cds_arr)
 
-                    if not logic.is_all_bigger_than_cut_off(
-                            [end_idx_arr[i] - start_idx_arr[i] for i in range(len(start_idx_arr))]):
-                        continue
-
                     p_cds_seq = logic_prep.get_seq_by_idx_arr(p_seq, start_idx_arr, end_idx_arr)
+                    if len(p_cds_seq) % 3 != 0:
+                        continue
                     if logic.exist_another_orf_end_codon_in_cds_seq(p_cds_seq):
                         continue
 
@@ -182,12 +180,10 @@ def filter_out_cds_wout_strt_cdn(cds_list):
                 if end_codon in END_CD_ARR:
                     start_idx_arr, end_idx_arr = logic_prep.get_orf_strt_end_idx_arr(cds_arr)
 
-                    if not logic.is_all_bigger_than_cut_off(
-                            [end_idx_arr[i] - start_idx_arr[i] for i in range(len(start_idx_arr))]):
+                    m_cds_seq = logic_prep.get_seq_by_idx_arr(m_seq, start_idx_arr, end_idx_arr)
+                    if len(m_cds_seq) % 3 != 0:
                         continue
-
-                    m_cds_seq = logic_prep.get_seq_by_idx_arr(m_seq, start_idx_arr, end_idx_arr)[::-1]
-                    if logic.exist_another_orf_end_codon_in_cds_seq(m_cds_seq):
+                    if logic.exist_another_orf_end_codon_in_cds_seq(m_cds_seq, False):
                         continue
 
                     tmp_arr = []

@@ -38,11 +38,21 @@ class LogicPreps:
         return result_dict
 
     def get_orf_strt_end_idx_arr(self, cds_arr):
-        start_idx_arr = [int(cds_arr[6])]
+        orf_strt_idx = int(cds_arr[6])
+        orf_end_idx = int(cds_arr[7])
+
+        start_idx_arr = [orf_strt_idx]
         start_idx_arr.extend([int(cds_idx) for cds_idx in re.findall('\d+', cds_arr[9])[1:]])
         end_idx_arr = [int(cds_idx) for cds_idx in re.findall('\d+', cds_arr[10])[:-1]]
-        end_idx_arr.append(int(cds_arr[7]))
-        return start_idx_arr, end_idx_arr
+        end_idx_arr.append(orf_end_idx)
+
+        # check UTR in first and last codon
+        sorted_start_idx_arr = sorted(start_idx_arr)
+        sorted_end_idx_arr = sorted(end_idx_arr)
+        strt_idx = sorted_start_idx_arr.index(orf_strt_idx)
+        end_idx = sorted_end_idx_arr.index(orf_end_idx)
+
+        return sorted_start_idx_arr[strt_idx: end_idx + 1], sorted_end_idx_arr[strt_idx: end_idx + 1]
 
     def get_idx_num_frm_strt_to_end_list(self, start_idx_arr, end_idx_arr):
         result_list = []

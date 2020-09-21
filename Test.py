@@ -51,10 +51,37 @@ def read_FASTA():
         print(seq_record.seq[TRGT_IDX:TRGT_IDX + len("ATTTG")])
         print(anti_seq[TRGT_IDX:TRGT_IDX + len("ATTTG")])
 
+def test():
+    tmp_str = "PERM1	NM_001291366	chr1	-	975198	982117	976171	981029	4	975198,976498,978880,982064,	976269,976624,981047,982117,\n"
+    tmp_str += "PERM1	NM_001291367	chr1	-	975198	982117	976171	982117	5	975198,976498,978880,981136,982064,	976269,976624,980657,981173,982117,\n"
+    tmp_str += "SAMD11	NM_152486	chr1	+	925730	944574	925941	944153	14	925730,925921,930154,931038,935771,939039,939274,941143,942135,942409,942558,943252,943697,943907,	925800,926013,930336,931089,935896,939129,939460,941306,942251,942488,943058,943377,943808,944574,\n"
+    logic_prep = LogicPrep.LogicPreps()
+
+    cds_list = []
+    for tmp_arr in tmp_str.split('\n')[:-1]:
+        cds_list.append(tmp_arr.split('\t'))
+
+    for cds_arr in cds_list:
+        print(cds_arr)
+        start_idx_arr, end_idx_arr = logic_prep.get_orf_strt_end_idx_arr(cds_arr)
+        print(start_idx_arr, " : start_idx_arr")
+        print(end_idx_arr, " : end_idx_arr")
+        print([end_idx_arr[i] - start_idx_arr[i] for i in range(len(start_idx_arr))], " : end_idx_arr[i] - start_idx_arr[i]")
+
+def test1():
+    logic = Logic.Logics()
+    logic.exist_another_orf_end_codon_in_cds_seq("ABCD", False)
+
+
+
+
+
+
 
 if __name__ == '__main__':
     start_time = time.perf_counter()
     print("start [ " + PROJECT_NAME + " ]>>>>>>>>>>>>>>>>>>")
     # main()
-    read_FASTA()
+    # read_FASTA()
+    test1()
     print("::::::::::: %.2f seconds ::::::::::::::" % (time.perf_counter() - start_time))
