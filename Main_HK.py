@@ -136,7 +136,7 @@ def make_filtered_hg38_refFlat():
 
     header = ['GeneSym', 'NMID', 'Chrom', 'Strand', 'Transcript_Start', 'End', 'ORFStart', 'End', '#Exon', 'ExonS_list',
               'ExonE_list']
-    util.make_excel(WORK_DIR + "input/filtered_hg38_refFlat", header, result_list)
+    util.make_excel(WORK_DIR + "output/filtered_hg38_refFlat", header, result_list)
 
 
 def filter_out_cds_wout_strt_cdn(cds_list):
