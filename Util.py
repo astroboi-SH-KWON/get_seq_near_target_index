@@ -66,7 +66,7 @@ class Utils:
     """
     :param
         path : file path with ext
-        f_format : file format (ex : fasta, genbak...)
+        f_format : file format (ex : fasta, genbank...)
     """
     def read_file_by_biopython(self, path, f_format):
         seq_record = SeqIO.read(path, f_format)
