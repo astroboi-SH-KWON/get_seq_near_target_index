@@ -60,7 +60,7 @@ class Utils:
             for data_arr in data_list:
                 tmp_row = ''
                 for row_val in data_arr[strt_idx:]:
-                    tmp_row += (row_val + deli)
+                    tmp_row += (str(row_val) + deli)
                 f.write(tmp_row[:-1] + "\n")
 
     """

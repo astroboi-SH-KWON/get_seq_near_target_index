@@ -57,6 +57,11 @@ def multi_processing_get_seq_pam_in_orf():
     result_list = manager.list()
     jobs = []
     for key in file_nm_arr:
+        if key not in cds_dict:
+            continue
+        if key not in seq_idx_dict:
+            continue
+
         proc = mp.Process(target=logic.get_seq_pam_in_orf, args=(key, cds_dict, seq_idx_dict, result_list))
         jobs.append(proc)
         proc.start()
@@ -247,6 +252,6 @@ if __name__ == '__main__':
     start_time = time.perf_counter()
     print("start [ " + PROJECT_NAME + " ]>>>>>>>>>>>>>>>>>>")
     # multi_processing_1()
-    make_filtered_hg38_refFlat()
+    # make_filtered_hg38_refFlat()
     multi_processing_get_seq_pam_in_orf()
     print("::::::::::: %.2f seconds ::::::::::::::" % (time.perf_counter() - start_time))

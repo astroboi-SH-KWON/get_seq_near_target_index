@@ -20,6 +20,7 @@ else:
 
 PROJECT_NAME = WORK_DIR.split("/")[-2]
 MUT_INFO = "200907_Dominant filter.txt"
+FILTERED_CDS_INFO = "filtered_hg38_refFlat.txt"
 
 OTHOLOG = ['SaCas9', 'SaCas9_KKH', 'SaCas9_NNG', 'St1Cas9', 'Nm1Cas9', 'Nm2Cas9', 'CjCas9']
 PAMS = ['NNGRRT', 'NNNRRT', 'NNG', 'NNRGAA', 'NNNNGATT', 'NNNNCC', 'NNNNRYAC']
@@ -27,15 +28,77 @@ SEQ_F_PAM = [43, 43, 43, 41, 45, 44, 44]
 SEQ_B_PAM = [3, 3, 3, 3, 3, 3, 3]
 WIN_SIZE = [60, 60]
 
+RATIO = [0.05, 0.65]
 INIT = [OTHOLOG, PAMS, SEQ_F_PAM, SEQ_B_PAM]
-
+INIT_BY_PAM = [
+    ['SaCas9', 'NNGRRT', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9_KKH', 'NNNRRT', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9_NNG', 'NNG', 43, 3, WIN_SIZE, RATIO]
+    , ['St1Cas9', 'NNRGAA', 41, 3, WIN_SIZE, RATIO]
+    , ['Nm1Cas9', 'NNNNGATT', 45, 3, WIN_SIZE, RATIO]
+    , ['Nm2Cas9', 'NNNNCC', 44, 3, WIN_SIZE, RATIO]
+    , ['CjCas9', 'NNNNRYAC', 44, 3, WIN_SIZE, RATIO]
+]
 TOTAL_CPU = mp.cpu_count()
 MULTI_CNT = int(TOTAL_CPU*0.8)
 ############### end setting env #################
 
+def multi_processing_by_pam():
+    logic = Logic.Logics()
+    logic_prep = LogicPrep.LogicPreps()
+    util = Util.Utils()
 
+    mut_list = []
+    if SYSTEM_NM == 'Linux':
+        mut_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/" + MUT_INFO, "\t"))
+    else:
+        # 20, 21, 22, X
+        mut_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/" + MUT_INFO, "\t")[20000:])
 
-def multi_processing():
+    cds_info = util.read_csv_ignore_N_line(WORK_DIR + "input/" + FILTERED_CDS_INFO, "\t")
+
+    mut_dict = logic_prep.get_dict_from_list_by_ele_key(mut_list, 0)
+    cds_dict = logic_prep.get_dict_from_list_by_ele_key(cds_info, 2)
+
+    file_nm_arr = ['chrX', 'chrY']
+    if SYSTEM_NM == 'Linux':
+        for f_num in range(1, 23):
+            file_nm_arr.append("chr" + str(f_num))
+    else:
+        for f_num in range(20, 23):
+            file_nm_arr.append("chr" + str(f_num))
+
+    for init in INIT_BY_PAM:
+        pam_nm = init[0]
+        len_f_pam = init[2]
+        len_b_pam = init[3]
+        init.extend([cds_dict, mut_dict])
+
+        manager = mp.Manager()
+        result_list = manager.list()
+        jobs = []
+        for key in file_nm_arr:
+            if key not in cds_dict:
+                continue
+            if key.replace("chr", "") not in mut_dict:
+                continue
+            proc = mp.Process(target=logic.get_seq_clvg_pos_in_cds, args=(REF_DIR, key, init, result_list))
+            jobs.append(proc)
+            proc.start()
+
+        for ret_proc in jobs:
+            ret_proc.join()
+
+        header = ['chr_nm', 'gene_sym', 'nm_id', 'strand', 'PAM',
+                  str(len_f_pam) + 'bp + PAM + ' + str(len_b_pam) + 'bp', 'spacer', 'clvg_site_ratio']
+        try:
+            os.remove(WORK_DIR + "output/cleavage_pos_in_cds_" + pam_nm + ".txt")
+        except Exception as err:
+            print('os.remove(WORK_DIR + "output/cleavage_pos_in_cds_" + pma_nm + ".txt") : ', str(err))
+        util.make_csv(WORK_DIR + "output/cleavage_pos_in_cds_" + pam_nm + ".txt", header, result_list, 0, "\t")
+        util.make_excel(WORK_DIR + "output/cleavage_pos_in_cds_" + pam_nm, header, result_list)
+
+def multi_processing_for_whole_pam():
     logic_prep = LogicPrep.LogicPreps()
     util = Util.Utils()
 
@@ -150,5 +213,6 @@ def main():
 if __name__ == '__main__':
     start_time = time.perf_counter()
     print("start [ " + PROJECT_NAME + " ]>>>>>>>>>>>>>>>>>>")
-    multi_processing()
+    # multi_processing_for_whole_pam()
+    multi_processing_by_pam()
     print("::::::::::: %.2f seconds ::::::::::::::" % (time.perf_counter() - start_time))

@@ -7,6 +7,7 @@ class Logics:
     def __init__(self):
         self.strt_cd_arr = ['ATG']
         self.end_cd_arr = ['TGA', 'TAG', 'TAA']
+        self.len_clvg = 3
 
     def complement_char(self, ch):
         complement_char_dict = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', 'N': 'N'}
@@ -139,6 +140,56 @@ class Logics:
                     result_dict[m_seq_f_pam[::-1]].append((m_seq_b_pam + m_ref_pam_seq + m_seq_f_pam)[::-1])
                 else:
                     result_dict.update({m_seq_f_pam[::-1]: [(m_seq_b_pam + m_ref_pam_seq + m_seq_f_pam)[::-1]]})
+
+        return result_dict, m_ori_win_seq[::-1]
+
+    def get_matched_pam_clvg_p_seq_dict(self, p_seq, pos, win_arr, ref_seq, pam, len_f_pam, len_b_pam):
+        result_dict = {}
+        len_pam = len(pam)
+        len_ref_seq = len(ref_seq)
+
+        p_ori_win_f_seq = p_seq[pos - win_arr[0]: pos]
+        p_ori_win_b_seq = p_seq[pos + len(ref_seq): pos + len(ref_seq) + win_arr[1]]
+        p_ori_win_seq = p_ori_win_f_seq + ref_seq + p_ori_win_b_seq
+
+        p_first_pam_pos = len(p_ori_win_f_seq) - len_pam + 1
+
+        for i in range(len_pam + len_ref_seq - 1):
+            p_ref_pam_seq = p_ori_win_seq[i + p_first_pam_pos: i + p_first_pam_pos + len_pam]
+            if self.match_SY(0, p_ref_pam_seq, pam):
+                p_seq_f_pam = p_ori_win_seq[i + p_first_pam_pos - len_f_pam: i + p_first_pam_pos]
+                p_seq_b_pam = p_ori_win_seq[i + p_first_pam_pos + len_pam: i + p_first_pam_pos + len_pam + len_b_pam]
+
+                pos_clvg = i + pos - len_pam + 1 - self.len_clvg
+                if p_seq_f_pam in result_dict:
+                    result_dict[p_seq_f_pam].append([p_seq_f_pam + p_ref_pam_seq + p_seq_b_pam, pos_clvg])
+                else:
+                    result_dict.update({p_seq_f_pam: [[p_seq_f_pam + p_ref_pam_seq + p_seq_b_pam, pos_clvg]]})
+
+        return result_dict, p_ori_win_seq
+
+    def get_matched_pam_clvg_m_seq_dict(self, m_seq, pos, win_arr, ref_seq, pam, len_f_pam, len_b_pam):
+        result_dict = {}
+        len_pam = len(pam)
+        len_ref_seq = len(ref_seq)
+
+        m_ori_win_f_seq = m_seq[pos - win_arr[0]: pos]
+        m_ori_win_b_seq = m_seq[pos + len(ref_seq): pos + len(ref_seq) + win_arr[1]]
+        m_ori_win_seq = m_ori_win_f_seq + ref_seq + m_ori_win_b_seq
+
+        m_first_pam_pos = len(m_ori_win_f_seq) - len_pam + 1
+
+        for i in range(len_pam + len_ref_seq - 1):
+            m_ref_pam_seq = m_ori_win_seq[i + m_first_pam_pos: i + m_first_pam_pos + len_pam]
+            if self.match_SY(0, m_ref_pam_seq, pam[::-1]):
+                m_seq_f_pam = m_ori_win_seq[i + m_first_pam_pos + len_pam: i + m_first_pam_pos + len_pam + len_f_pam]
+                m_seq_b_pam = m_ori_win_seq[i + m_first_pam_pos - len_b_pam: i + m_first_pam_pos]
+
+                pos_clvg = i + pos + 1 + self.len_clvg
+                if m_seq_f_pam[::-1] in result_dict:
+                    result_dict[m_seq_f_pam[::-1]].append([(m_seq_b_pam + m_ref_pam_seq + m_seq_f_pam)[::-1], pos_clvg])
+                else:
+                    result_dict.update({m_seq_f_pam[::-1]: [[(m_seq_b_pam + m_ref_pam_seq + m_seq_f_pam)[::-1], pos_clvg]]})
 
         return result_dict, m_ori_win_seq[::-1]
 
@@ -292,3 +343,93 @@ class Logics:
                     result_list.append(tmp_arr)
 
         print("DONE : ", key, " >>> get_seq_pam_in_orf")
+
+    def get_seq_clvg_pos_in_cds(self, ref_dir, key, init, result_list):
+        def_nm = "get_seq_clvg_pos_in_cds"
+        print("key : ", key, " , start >>> ", def_nm)
+        otholog = init[0]
+        pam_seq = init[1]
+        len_f_pam = init[2]
+        len_b_pam = init[3]
+        win_arr = init[4]
+        ratio_f = init[5][0]
+        ratio_b = init[5][1]
+        cds_list = init[6][key]
+        mut_list = init[7][key.replace("chr", "")]
+
+        logic_prep = LogicPrep.LogicPreps()
+
+        for mut_arr in mut_list:
+            tmp_arr = []
+            tmp_arr.extend(mut_arr)
+            chr_num = mut_arr[0]
+            pos = int(mut_arr[1]) - 1
+            ref_p_seq = mut_arr[3]
+            alt_p_seq = mut_arr[4]
+
+            ref_m_seq = ""
+            alt_m_seq = ""
+            try:
+                ref_m_seq += self.make_complement_string(ref_p_seq)
+                if alt_p_seq == '.':
+                    alt_p_seq = ""
+                else:
+                    alt_m_seq += self.make_complement_string(alt_p_seq)
+            except Exception as err:
+                print(def_nm + " ==> make_complement_string ::: ", err)
+                print(ref_p_seq, " : ref_p_seq")
+                print(alt_p_seq, " : alt_p_seq")
+                print(str(mut_arr))
+
+            seq_record = SeqIO.read(ref_dir + "chr" + chr_num + ".fa", "fasta")
+            p_seq = str(seq_record.seq).upper()
+            m_seq = str(seq_record.seq.complement()).upper()
+
+            ref_p_dict, p_ori_win_seq = self.get_matched_pam_clvg_p_seq_dict(p_seq, pos, win_arr, ref_p_seq, pam_seq,
+                                                                         len_f_pam, len_b_pam)
+            ref_m_dict, m_ori_win_seq = self.get_matched_pam_clvg_m_seq_dict(m_seq, pos, win_arr, ref_m_seq, pam_seq,
+                                                                         len_f_pam, len_b_pam)
+
+            mut_p_dict, _ = self.get_matched_pam_clvg_p_seq_dict(p_seq, pos, win_arr, alt_p_seq, pam_seq, len_f_pam,
+                                                             len_b_pam)
+            mut_m_dict, _ = self.get_matched_pam_clvg_m_seq_dict(m_seq, pos, win_arr, alt_m_seq, pam_seq, len_f_pam,
+                                                             len_b_pam)
+
+            self.remove_dict_val_by_key(mut_p_dict, ref_p_dict.keys())
+            self.remove_dict_val_by_key(mut_m_dict, ref_m_dict.keys())
+
+            for cds_arr in cds_list:
+                gene_sym = cds_arr[0]
+                nm_id = cds_arr[1]
+                chr_nm = cds_arr[2]
+                strand = cds_arr[3]
+                orf_strt_pos = int(cds_arr[6])
+                orf_end_pos = int(cds_arr[7])
+
+                start_idx_arr, end_idx_arr = logic_prep.get_orf_strt_end_idx_arr(cds_arr)
+                idx_list = logic_prep.get_idx_num_frm_strt_to_end_list(start_idx_arr, end_idx_arr)
+
+                if strand == '+':
+                    for val_list in mut_p_dict.values():
+                        for val_arr in val_list:
+                            res_seq = val_arr[0]
+                            pos_clvg = val_arr[1]
+
+                            if pos_clvg in idx_list:
+                                idx_clvg_cds = idx_list.index(pos_clvg) + 1
+                                pos_ratio_cds = idx_clvg_cds / len(idx_list)
+                                if ratio_f < pos_ratio_cds < ratio_b:
+                                    result_list.append([chr_nm, gene_sym, nm_id, strand, res_seq[len_f_pam: - len_b_pam], res_seq, res_seq[: len_f_pam], pos_ratio_cds])
+                else:
+                    for val_list in mut_m_dict.values():
+                        for val_arr in val_list:
+                            res_seq = val_arr[0]
+                            pos_clvg = val_arr[1]
+
+                            if pos_clvg in idx_list:
+                                idx_clvg_cds = idx_list.index(pos_clvg)
+                                pos_ratio_cds = (len(idx_list) - idx_clvg_cds) / len(idx_list)
+                                if ratio_f < pos_ratio_cds < ratio_b:
+                                    result_list.append([chr_nm, gene_sym, nm_id, strand, res_seq[len_f_pam: - len_b_pam], res_seq, res_seq[: len_f_pam], pos_ratio_cds])
+
+        print("DONE : ", key, " >>> ", def_nm)

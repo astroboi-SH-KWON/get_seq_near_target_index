@@ -17,11 +17,21 @@ WORK_DIR = os.getcwd() + "/"
 REF_DIR = "D:/000_WORK/000_reference_path/human/hg38/Splited/"
 PROJECT_NAME = WORK_DIR.split("/")[-2]
 CDS_INFO = "hg38_refFlat_full.txt"
-MUT_INFO = "20200909_ClinVar_hg38.txt"
+# MUT_INFO = "20200909_ClinVar_hg38.txt"
+MUT_INFO = "200907_Dominant filter.txt"
 
 TRGT_IDX = 686651
 
-
+WIN_SIZE = [60, 60]
+INIT_BY_PAM = [
+    ['SaCas9', 'NNGRRT', 43, 3, WIN_SIZE]
+    , ['SaCas9_KKH', 'NNNRRT', 43, 3, WIN_SIZE]
+    , ['SaCas9_NNG', 'NNG', 43, 3, WIN_SIZE]
+    , ['St1Cas9', 'NNRGAA', 41, 3, WIN_SIZE]
+    , ['Nm1Cas9', 'NNNNGATT', 45, 3, WIN_SIZE]
+    , ['Nm2Cas9', 'NNNNCC', 44, 3, WIN_SIZE]
+    , ['CjCas9', 'NNNNRYAC', 44, 3, WIN_SIZE]
+]
 
 ############### end setting env #################
 
@@ -43,13 +53,42 @@ def main():
     print(cds_dict)
 
 
-def read_FASTA():
-    for seq_record in SeqIO.parse(REF_DIR + "chr1.fa", "fasta"):
-        anti_seq = seq_record.seq.complement()
-        print(seq_record.seq[TRGT_IDX - 1:TRGT_IDX - 1 + len("ATTTG")], " -1")
-        print(anti_seq[TRGT_IDX - 1:TRGT_IDX - 1 + len("ATTTG")], " -1 complement")
-        print(seq_record.seq[TRGT_IDX:TRGT_IDX + len("ATTTG")])
-        print(anti_seq[TRGT_IDX:TRGT_IDX + len("ATTTG")])
+def test_SY():
+    logic_prep = LogicPrep.LogicPreps()
+    logic = Logic.Logics()
+    util = Util.Utils()
+
+    mut_list = util.read_csv_ignore_N_line(WORK_DIR + "input/" + MUT_INFO, "\t")[20000:]
+
+    win_arr = WIN_SIZE
+    for mut_arr in mut_list:
+        tmp_arr = []
+        tmp_arr.extend(mut_arr)
+        chr_num = mut_arr[0]
+        pos = int(mut_arr[1]) - 1
+        ref_p_seq = mut_arr[3]
+        alt_p_seq = mut_arr[4]
+
+        ref_m_seq = ""
+        alt_m_seq = ""
+        try:
+            ref_m_seq += logic.make_complement_string(ref_p_seq)
+            if alt_p_seq == '.':
+                alt_p_seq = ""
+            else:
+                alt_m_seq += logic.make_complement_string(alt_p_seq)
+        except Exception as err:
+            print("make_complement_string ::: ", err)
+            print(ref_p_seq, " : ref_p_seq")
+            print(alt_p_seq, " : alt_p_seq")
+            print(str(mut_arr))
+
+        seq_record = SeqIO.read(REF_DIR + "chr" + chr_num + ".fa", "fasta")
+        p_seq = str(seq_record.seq).upper()
+        m_seq = str(seq_record.seq.complement()).upper()
+
+        for init in INIT_BY_PAM:
+            logic.get_matched_pam_clvg_p_seq_dict(p_seq, pos, win_arr, ref_p_seq, init[1], init[2], init[3])
 
 def test():
     tmp_str = "PERM1	NM_001291366	chr1	-	975198	982117	976171	981029	4	975198,976498,978880,982064,	976269,976624,981047,982117,\n"
@@ -71,13 +110,13 @@ def test():
         tmp_idx = ""
         for idx in idx_list:
             tmp_idx += "0"
-        print(tmp_idx)
+        print(len(tmp_idx))
         print(p_cds_seq)
 
 if __name__ == '__main__':
     start_time = time.perf_counter()
     print("start [ " + PROJECT_NAME + " ]>>>>>>>>>>>>>>>>>>")
     # main()
-    # read_FASTA()
-    test()
+    # test()
+    test_SY()
     print("::::::::::: %.2f seconds ::::::::::::::" % (time.perf_counter() - start_time))
