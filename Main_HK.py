@@ -21,6 +21,8 @@ else:
 PROJECT_NAME = WORK_DIR.split("/")[-2]
 CDS_INFO = "hg38_refFlat_full.txt"
 MUT_INFO = "20200909_ClinVar_hg38.txt"
+FILTERED_CDS_INFO = "filtered_hg38_refFlat.txt"
+multi_processing_1_FILE = "ClinVar_hg38_result.txt"
 STRT_CD_ARR = ['ATG']
 END_CD_ARR = ['TGA', 'TAG', 'TAA']
 
@@ -32,6 +34,44 @@ SEQ_WIN_SIZE = [30, 30]
 TOTAL_CPU = mp.cpu_count()
 MULTI_CNT = int(TOTAL_CPU*0.8)
 ############### end setting env #################
+
+def multi_processing_get_seq_pam_in_orf():
+    # needs 24 proc for running all chromosomes(chrX, chrY, chr1, ..., chr22)
+
+    util = Util.Utils()
+    logic_prep = LogicPrep.LogicPreps()
+    logic = Logic.Logics()
+
+    cds_info = util.read_csv_ignore_N_line(WORK_DIR + "input/" + FILTERED_CDS_INFO, "\t")
+    seq_idx_info = util.read_csv_ignore_N_line(WORK_DIR + "input/" + multi_processing_1_FILE, "\t")
+
+    cds_dict = logic_prep.get_dict_from_list_by_ele_key(cds_info, 2)
+    seq_idx_dict = logic_prep.get_dict_from_list_by_ele_key(seq_idx_info, 0)
+
+    file_nm_arr = ['chrX', 'chrY']
+    if SYSTEM_NM == 'Linux':
+        for f_num in range(1, 23):
+            file_nm_arr.append("chr" + str(f_num))
+
+    manager = mp.Manager()
+    result_list = manager.list()
+    jobs = []
+    for key in file_nm_arr:
+        proc = mp.Process(target=logic.get_seq_pam_in_orf, args=(key, cds_dict, seq_idx_dict, result_list))
+        jobs.append(proc)
+        proc.start()
+
+    for ret_proc in jobs:
+        ret_proc.join()
+
+    header = ['CHROM', 'PAM', str(SEQ_WIN_SIZE[0]) + ' + PAM + ' + str(SEQ_WIN_SIZE[1]), 'PAM_POS', 'STRAND', 'off_ORF',
+              'gene_sym', 'nm_id']
+    try:
+        os.remove(WORK_DIR + "output/total_ClinVar_hg38.txt")
+    except Exception as err:
+        print('os.remove(WORK_DIR + "output/total_ClinVar_hg38.txt") : ', str(err))
+    util.make_csv(WORK_DIR + "output/total_ClinVar_hg38.txt", header, result_list, 0, "\t")
+    util.make_excel(WORK_DIR + "output/total_ClinVar_hg38", header, result_list)
 
 def multi_processing_1():
     logic_prep = LogicPrep.LogicPreps()
@@ -57,6 +97,11 @@ def multi_processing_1():
     result_list = logic_prep.merge_multi_list(pool_list)
 
     header = ['CHROM', 'PAM', str(SEQ_WIN_SIZE[0]) + ' + PAM + ' + str(SEQ_WIN_SIZE[1]), 'PAM_POS', 'STRAND']
+    try:
+        os.remove(WORK_DIR + "input/" + multi_processing_1_FILE)
+    except Exception as err:
+        print('os.remove(WORK_DIR + "input/" + multi_processing_1_FILE) : ', str(err))
+    util.make_csv(WORK_DIR + "input/" + multi_processing_1_FILE, header, result_list, 0, "\t")
     util.make_excel(WORK_DIR + "output/ClinVar_hg38_result", header, result_list)
 
 def get_PAM_within_N_bp_of_POS(mut_list):
@@ -135,7 +180,12 @@ def make_filtered_hg38_refFlat():
     result_list = logic_prep.merge_multi_list(pool_cds_idx_list)
 
     header = ['GeneSym', 'NMID', 'Chrom', 'Strand', 'Transcript_Start', 'End', 'ORFStart', 'End', '#Exon', 'ExonS_list',
-              'ExonE_list', 'int(NMID)']
+              'ExonE_list']
+    try:
+        os.remove(WORK_DIR + "input/" + FILTERED_CDS_INFO)
+    except Exception as err:
+        print('os.remove(WORK_DIR + "input/" + FILTERED_CDS_INFO) : ', str(err))
+    util.make_csv(WORK_DIR + "input/" + FILTERED_CDS_INFO, header, result_list, 0, "\t")
     util.make_excel(WORK_DIR + "output/filtered_hg38_refFlat", header, result_list)
 
 
@@ -193,15 +243,10 @@ def filter_out_cds_wout_strt_cdn(cds_list):
     print("DONE filter_out_cds_wout_strt_cdn!!!!")
     return result_list
 
-def test():
-    logic = Logic.Logics()
-    test_list = [-141, 92, 182, 51, 125, 90, 186, 163, 116, 79, 500, 125, 111, 246]
-    print(logic.is_all_bigger_than_cut_off(test_list))
-
 if __name__ == '__main__':
     start_time = time.perf_counter()
     print("start [ " + PROJECT_NAME + " ]>>>>>>>>>>>>>>>>>>")
     # multi_processing_1()
     make_filtered_hg38_refFlat()
-    # test()
+    multi_processing_get_seq_pam_in_orf()
     print("::::::::::: %.2f seconds ::::::::::::::" % (time.perf_counter() - start_time))

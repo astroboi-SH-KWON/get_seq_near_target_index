@@ -50,6 +50,19 @@ class Utils:
 
         workbook.save(filename=path + self.ext_xlsx)
 
+    def make_csv(self, path, header, data_list, strt_idx=0, deli=','):
+        with open(path, 'a') as f:
+            tmp_head = ''
+            for head in header[strt_idx:]:
+                tmp_head += (head + deli)
+            f.write(tmp_head[:-1] + "\n")
+
+            for data_arr in data_list:
+                tmp_row = ''
+                for row_val in data_arr[strt_idx:]:
+                    tmp_row += (row_val + deli)
+                f.write(tmp_row[:-1] + "\n")
+
     """
     :param
         path : file path with ext
@@ -58,3 +71,9 @@ class Utils:
     def read_file_by_biopython(self, path, f_format):
         seq_record = SeqIO.read(path, f_format)
         return str(seq_record.seq).upper(), str(seq_record.seq.complement()).upper()
+
+    def make_dict_to_list(self, input_dict):
+        result_list = []
+        for val_list in input_dict.values():
+            result_list.extend(val_list)
+        return result_list

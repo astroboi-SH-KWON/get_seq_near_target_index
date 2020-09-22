@@ -67,7 +67,7 @@ class LogicPreps:
         for idx in range(len(start_idx_arr)):
             nxt_idx = int(start_idx_arr[idx])
             end_idx = int(end_idx_arr[idx])
-            result_seq = full_seq[nxt_idx: end_idx]
+            result_seq += full_seq[nxt_idx: end_idx]
 
         return result_seq
 
@@ -118,9 +118,18 @@ class LogicPreps:
         # get the lowest num of nm_id in each gene_sym
         for cds_list in gene_sym_dict.values():
             sorted_cds_list = self.sort_list_by_ele(cds_list, -1, False)
-            result_list.append(sorted_cds_list[0])
+            result_list.append(sorted_cds_list[0][:-1])
 
         return result_list
+
+    def get_dict_from_list_by_ele_key(self, data_list, key_idx):
+        result_dict = {}
+        for val_arr in data_list:
+            if val_arr[key_idx] in result_dict:
+                result_dict[val_arr[key_idx]].append(val_arr)
+            else:
+                result_dict.update({val_arr[key_idx]: [val_arr]})
+        return result_dict
 
 
 

@@ -255,3 +255,40 @@ class Logics:
 
     def get_len_each_codon_list(self, start_idx_arr, end_idx_arr):
         return [end_idx_arr[i] - start_idx_arr[i] for i in range(len(start_idx_arr))]
+
+    def get_seq_pam_in_orf(self, key, cds_dict, seq_idx_dict, result_list):
+        logic_prep = LogicPrep.LogicPreps()
+
+        print("key : ", key, " , start >>> get_seq_pam_in_orf")
+        cds_list = cds_dict[key]
+        seq_idx_list = seq_idx_dict[key]
+
+        for cds_arr in cds_list:
+            gene_sym = cds_arr[0]
+            nm_id = cds_arr[1]
+            chr_nm = cds_arr[2]
+            strand = cds_arr[3]
+            orf_strt_pos = int(cds_arr[6])
+            orf_end_pos = int(cds_arr[7])
+
+            start_idx_arr, end_idx_arr = logic_prep.get_orf_strt_end_idx_arr(cds_arr)
+            idx_list = logic_prep.get_idx_num_frm_strt_to_end_list(start_idx_arr, end_idx_arr)
+
+            for seq_idx_arr in seq_idx_list:
+                pam_full_idx = int(seq_idx_arr[3])
+                if pam_full_idx in idx_list:
+                    pam_idx = idx_list.index(pam_full_idx)
+
+                    if strand != seq_idx_arr[4]:
+                        continue
+                    tmp_arr = []
+                    tmp_arr.extend(seq_idx_arr)
+                    if strand == '+':
+                        orf_missing = pam_idx % 3
+                        tmp_arr.extend([orf_missing, gene_sym, nm_id])
+                    else:
+                        orf_missing = (len(idx_list) - pam_idx - 1) % 3
+                        tmp_arr.extend([orf_missing, gene_sym, nm_id])
+                    result_list.append(tmp_arr)
+
+        print("DONE : ", key, " >>> get_seq_pam_in_orf")

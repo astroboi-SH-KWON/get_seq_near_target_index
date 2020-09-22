@@ -56,6 +56,7 @@ def test():
     tmp_str += "PERM1	NM_001291367	chr1	-	975198	982117	976171	982117	5	975198,976498,978880,981136,982064,	976269,976624,980657,981173,982117,\n"
     tmp_str += "SAMD11	NM_152486	chr1	+	925730	944574	925941	944153	14	925730,925921,930154,931038,935771,939039,939274,941143,942135,942409,942558,943252,943697,943907,	925800,926013,930336,931089,935896,939129,939460,941306,942251,942488,943058,943377,943808,944574,\n"
     logic_prep = LogicPrep.LogicPreps()
+    util = Util.Utils()
 
     cds_list = []
     for tmp_arr in tmp_str.split('\n')[:-1]:
@@ -64,24 +65,19 @@ def test():
     for cds_arr in cds_list:
         print(cds_arr)
         start_idx_arr, end_idx_arr = logic_prep.get_orf_strt_end_idx_arr(cds_arr)
-        print(start_idx_arr, " : start_idx_arr")
-        print(end_idx_arr, " : end_idx_arr")
-        print([end_idx_arr[i] - start_idx_arr[i] for i in range(len(start_idx_arr))], " : end_idx_arr[i] - start_idx_arr[i]")
-
-def test1():
-    logic = Logic.Logics()
-    logic.exist_another_orf_end_codon_in_cds_seq("ABCD", False)
-
-
-
-
-
-
+        idx_list = logic_prep.get_idx_num_frm_strt_to_end_list(start_idx_arr, end_idx_arr)
+        p_seq, m_seq = util.read_file_by_biopython(REF_DIR + cds_arr[2] + ".fa", "fasta")
+        p_cds_seq = logic_prep.get_seq_by_idx_arr(p_seq, start_idx_arr, end_idx_arr)
+        tmp_idx = ""
+        for idx in idx_list:
+            tmp_idx += "0"
+        print(tmp_idx)
+        print(p_cds_seq)
 
 if __name__ == '__main__':
     start_time = time.perf_counter()
     print("start [ " + PROJECT_NAME + " ]>>>>>>>>>>>>>>>>>>")
     # main()
     # read_FASTA()
-    test1()
+    test()
     print("::::::::::: %.2f seconds ::::::::::::::" % (time.perf_counter() - start_time))
