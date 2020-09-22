@@ -403,8 +403,6 @@ class Logics:
                 nm_id = cds_arr[1]
                 chr_nm = cds_arr[2]
                 strand = cds_arr[3]
-                orf_strt_pos = int(cds_arr[6])
-                orf_end_pos = int(cds_arr[7])
 
                 start_idx_arr, end_idx_arr = logic_prep.get_orf_strt_end_idx_arr(cds_arr)
                 idx_list = logic_prep.get_idx_num_frm_strt_to_end_list(start_idx_arr, end_idx_arr)
@@ -419,7 +417,11 @@ class Logics:
                                 idx_clvg_cds = idx_list.index(pos_clvg) + 1
                                 pos_ratio_cds = idx_clvg_cds / len(idx_list)
                                 if ratio_f < pos_ratio_cds < ratio_b:
-                                    result_list.append([chr_nm, gene_sym, nm_id, strand, res_seq[len_f_pam: - len_b_pam], res_seq, res_seq[: len_f_pam], pos_ratio_cds])
+                                    # num_exon = self.get_num_exon(pos_clvg, start_idx_arr, end_idx_arr)
+                                    result_list.append(
+                                        [chr_nm, gene_sym, nm_id, pos_clvg, strand, res_seq[:22], res_seq[22:len_f_pam],
+                                         res_seq[len_f_pam: - len_b_pam], res_seq[- len_b_pam:], res_seq,
+                                         pos_ratio_cds])
                 else:
                     for val_list in mut_m_dict.values():
                         for val_arr in val_list:
@@ -430,6 +432,21 @@ class Logics:
                                 idx_clvg_cds = idx_list.index(pos_clvg)
                                 pos_ratio_cds = (len(idx_list) - idx_clvg_cds) / len(idx_list)
                                 if ratio_f < pos_ratio_cds < ratio_b:
-                                    result_list.append([chr_nm, gene_sym, nm_id, strand, res_seq[len_f_pam: - len_b_pam], res_seq, res_seq[: len_f_pam], pos_ratio_cds])
+                                    # num_exon = self.get_num_exon(pos_clvg, start_idx_arr, end_idx_arr, False)
+                                    result_list.append(
+                                        [chr_nm, gene_sym, nm_id, pos_clvg, strand, res_seq[:22], res_seq[22:len_f_pam],
+                                         res_seq[len_f_pam: - len_b_pam], res_seq[- len_b_pam:], res_seq,
+                                         pos_ratio_cds])
 
         print("DONE : ", key, " >>> ", def_nm)
+
+    def get_num_exon(self, pos_clvg, start_idx_arr, end_idx_arr, flag=True):
+        total_exon = len(start_idx_arr)
+        for j in range(total_exon):
+            strt_pos = start_idx_arr[j]
+            end_pos = end_idx_arr[j]
+            if strt_pos < pos_clvg < end_pos:
+                if flag:
+                    return j + 1
+                else:
+                    return total_exon - j

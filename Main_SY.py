@@ -49,24 +49,21 @@ def multi_processing_by_pam():
     util = Util.Utils()
 
     mut_list = []
+    file_nm_arr = ['chrX', 'chrY']
     if SYSTEM_NM == 'Linux':
         mut_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/" + MUT_INFO, "\t"))
+        for f_num in range(1, 23):
+            file_nm_arr.append("chr" + str(f_num))
     else:
         # 20, 21, 22, X
         mut_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/" + MUT_INFO, "\t")[20000:])
+        for f_num in range(20, 23):
+            file_nm_arr.append("chr" + str(f_num))
 
     cds_info = util.read_csv_ignore_N_line(WORK_DIR + "input/" + FILTERED_CDS_INFO, "\t")
 
     mut_dict = logic_prep.get_dict_from_list_by_ele_key(mut_list, 0)
     cds_dict = logic_prep.get_dict_from_list_by_ele_key(cds_info, 2)
-
-    file_nm_arr = ['chrX', 'chrY']
-    if SYSTEM_NM == 'Linux':
-        for f_num in range(1, 23):
-            file_nm_arr.append("chr" + str(f_num))
-    else:
-        for f_num in range(20, 23):
-            file_nm_arr.append("chr" + str(f_num))
 
     for init in INIT_BY_PAM:
         pam_nm = init[0]
@@ -89,14 +86,16 @@ def multi_processing_by_pam():
         for ret_proc in jobs:
             ret_proc.join()
 
-        header = ['chr_nm', 'gene_sym', 'nm_id', 'strand', 'PAM',
-                  str(len_f_pam) + 'bp + PAM + ' + str(len_b_pam) + 'bp', 'spacer', 'clvg_site_ratio']
+        header = ['chr_nm', 'gene_sym', 'nm_id', 'pos_clvg', 'strand', '22 bp', 'spacer', 'PAM', '3bp',
+                  str(len_f_pam) + 'bp + PAM + ' + str(len_b_pam) + 'bp', 'clvg_site_ratio']
         try:
             os.remove(WORK_DIR + "output/cleavage_pos_in_cds_" + pam_nm + ".txt")
         except Exception as err:
-            print('os.remove(WORK_DIR + "output/cleavage_pos_in_cds_" + pma_nm + ".txt") : ', str(err))
-        util.make_csv(WORK_DIR + "output/cleavage_pos_in_cds_" + pam_nm + ".txt", header, result_list, 0, "\t")
-        util.make_excel(WORK_DIR + "output/cleavage_pos_in_cds_" + pam_nm, header, result_list)
+            print('os.remove(WORK_DIR + "output/cleavage_pos_in_cds_"' + pam_nm + '".txt") : ', str(err))
+        sorted_result_list = logic_prep.sort_list_by_ele(result_list, 0, False)
+        print("start to make files for ", pam_nm)
+        util.make_csv(WORK_DIR + "output/cleavage_pos_in_cds_" + pam_nm + ".txt", header, sorted_result_list, 0, "\t")
+        util.make_excel(WORK_DIR + "output/cleavage_pos_in_cds_" + pam_nm, header, sorted_result_list)
 
 def multi_processing_for_whole_pam():
     logic_prep = LogicPrep.LogicPreps()
