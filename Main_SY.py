@@ -21,6 +21,7 @@ else:
 PROJECT_NAME = WORK_DIR.split("/")[-2]
 MUT_INFO = "200907_Dominant filter.txt"
 FILTERED_CDS_INFO = "filtered_hg38_refFlat.txt"
+RESULT_FILE = "SY_Dominant_result_by_spacer.txt"
 
 OTHOLOG = ['SaCas9', 'SaCas9_KKH', 'SaCas9_NNG', 'St1Cas9', 'Nm1Cas9', 'Nm2Cas9', 'CjCas9']
 PAMS = ['NNGRRT', 'NNNRRT', 'NNG', 'NNRGAA', 'NNNNGATT', 'NNNNCC', 'NNNNRYAC']
@@ -43,7 +44,52 @@ TOTAL_CPU = mp.cpu_count()
 MULTI_CNT = int(TOTAL_CPU*0.8)
 ############### end setting env #################
 
-def multi_processing_by_pam():
+def multi_processing_by_pam_w_whole_gene():
+    logic = Logic.Logics()
+    logic_prep = LogicPrep.LogicPreps()
+    util = Util.Utils()
+
+    file_nm_arr = ['chrX', 'chrY']
+    if SYSTEM_NM == 'Linux':
+        for f_num in range(1, 23):
+            file_nm_arr.append("chr" + str(f_num))
+    else:
+        for f_num in range(20, 23):
+            file_nm_arr.append("chr" + str(f_num))
+
+    cds_info = util.read_csv_ignore_N_line(WORK_DIR + "input/" + FILTERED_CDS_INFO, "\t")
+
+    cds_dict = logic_prep.get_dict_from_list_by_ele_key(cds_info, 2)
+
+    for init in INIT_BY_PAM:
+        pam_nm = init[0]
+        len_f_pam = init[2]
+        len_b_pam = init[3]
+        init.extend([cds_dict])
+
+        manager = mp.Manager()
+        result_list = manager.list()
+        jobs = []
+        for key in file_nm_arr:
+            if key not in cds_dict:
+                continue
+            proc = mp.Process(target=logic.get_seq_clvg_pos_in_cds_w_whole_gene, args=(REF_DIR, key, init, result_list))
+            jobs.append(proc)
+            proc.start()
+
+        for ret_proc in jobs:
+            ret_proc.join()
+
+        header = ['chr_nm', 'gene_sym', 'nm_id', 'transcrpt_strand', 'pos_clvg', 'pam_strand', '22 bp', 'spacer', 'PAM',
+                  '3bp', str(len_f_pam) + 'bp + PAM + ' + str(len_b_pam) + 'bp', 'clvg_site_ratio']
+
+        sorted_result_list = logic_prep.sort_list_by_ele(result_list, 0, False)
+        print("\nstart to make files for ", pam_nm, "\n")
+        util.make_csv(WORK_DIR + "output/cleavage_pos_in_cds_w_whole_gene_" + pam_nm + ".txt", header,
+                      sorted_result_list, 0, "\t")
+        util.make_excel(WORK_DIR + "output/cleavage_pos_in_cds_w_whole_gene_" + pam_nm, header, sorted_result_list)
+
+def multi_processing_by_pam_w_mut():
     logic = Logic.Logics()
     logic_prep = LogicPrep.LogicPreps()
     util = Util.Utils()
@@ -88,14 +134,11 @@ def multi_processing_by_pam():
 
         header = ['chr_nm', 'gene_sym', 'nm_id', 'pos_clvg', 'strand', '22 bp', 'spacer', 'PAM', '3bp',
                   str(len_f_pam) + 'bp + PAM + ' + str(len_b_pam) + 'bp', 'clvg_site_ratio']
-        try:
-            os.remove(WORK_DIR + "output/cleavage_pos_in_cds_" + pam_nm + ".txt")
-        except Exception as err:
-            print('os.remove(WORK_DIR + "output/cleavage_pos_in_cds_"' + pam_nm + '".txt") : ', str(err))
         sorted_result_list = logic_prep.sort_list_by_ele(result_list, 0, False)
-        print("start to make files for ", pam_nm)
-        util.make_csv(WORK_DIR + "output/cleavage_pos_in_cds_" + pam_nm + ".txt", header, sorted_result_list, 0, "\t")
-        util.make_excel(WORK_DIR + "output/cleavage_pos_in_cds_" + pam_nm, header, sorted_result_list)
+        print("\nstart to make files for ", pam_nm)
+        util.make_csv(WORK_DIR + "output/cleavage_pos_in_cds_w_mut_" + pam_nm + ".txt", header, sorted_result_list, 0,
+                      "\t")
+        util.make_excel(WORK_DIR + "output/cleavage_pos_in_cds_w_mut_" + pam_nm, header, sorted_result_list)
 
 def multi_processing_for_whole_pam():
     logic_prep = LogicPrep.LogicPreps()
@@ -121,7 +164,10 @@ def multi_processing_for_whole_pam():
 
     result_list = logic_prep.merge_multi_list(pool_list)
 
-    header = ['#CHROM',	'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'P_REF_SEQ_[' + str(WIN_SIZE[0]) + '], M_REF_SEQ_[' + str(WIN_SIZE[1]), 'SaCas9+', 'SaCas9-', 'SaCas9_KKH+', 'SaCas9_KKH-', 'SaCas9_NNG+', 'SaCas9_NNG-', 'St1Cas9+', 'St1Cas9-', 'Nm1Cas9+', 'Nm1Cas9-', 'Nm2Cas9+', 'Nm2Cas9-', 'CjCas9+', 'CjCas9-']
+    header = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO',
+              'P_REF_SEQ_[' + str(WIN_SIZE[0]) + '], M_REF_SEQ_[' + str(WIN_SIZE[1]) + ']', 'SaCas9+', 'SaCas9-',
+              'SaCas9_KKH+', 'SaCas9_KKH-', 'SaCas9_NNG+', 'SaCas9_NNG-', 'St1Cas9+', 'St1Cas9-', 'Nm1Cas9+',
+              'Nm1Cas9-', 'Nm2Cas9+', 'Nm2Cas9-', 'CjCas9+', 'CjCas9-']
     util.make_excel(WORK_DIR + "output/SY_Dominant_result_by_spacer", header, result_list)
 
 
@@ -195,6 +241,46 @@ def get_seq_by_pam_after_mut(mut_list):
     print("DONE multi_processing ::: get_seq_by_pam_after_mut >>>")
     return result_list
 
+def split_multi_processing_for_whole_pam_by_PAM():
+    util = Util.Utils()
+    result_list = util.read_csv_ignore_N_line(WORK_DIR + "input/" + RESULT_FILE, "\t")
+    result_dict = {
+        'SaCas9': []
+        , 'SaCas9_KKH': []
+        , 'SaCas9_NNG': []
+        , 'St1Cas9': []
+        , 'Nm1Cas9': []
+        , 'Nm2Cas9': []
+        , 'CjCas9': []
+    }
+    key_arr = ['SaCas9', 'SaCas9',
+              'SaCas9_KKH', 'SaCas9_KKH', 'SaCas9_NNG', 'SaCas9_NNG', 'St1Cas9', 'St1Cas9', 'Nm1Cas9',
+              'Nm1Cas9', 'Nm2Cas9', 'Nm2Cas9', 'CjCas9', 'CjCas9']
+    for val_arr in result_list:
+        ori_p = val_arr[8].replace('"', '').split(",")[0]
+        ori_m = val_arr[8].replace('"', '').split(",")[1]
+
+        for i in range(9, 23):
+            tmp_str = val_arr[i]
+            if tmp_str != '':
+                for val in tmp_str.replace('"', '').split(",")[:-1]:
+                    tmp_arr = val_arr[:8]
+                    if i % 2 == 0:
+                        tmp_arr.append("-")
+                        tmp_arr.append(ori_m)
+                    else:
+                        tmp_arr.append("+")
+                        tmp_arr.append(ori_p)
+                    tmp_arr.append(val)
+                    result_dict[key_arr[i - 9]].append(tmp_arr)
+
+    for key, val in result_dict.items():
+        header = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'strand',
+                  '[' + str(WIN_SIZE[0]) + ']_REF_SEQ_[' + str(WIN_SIZE[1]) + ']', 'seq']
+
+        util.make_csv(WORK_DIR + "output/SY_Dominant_result_by_spacer_" + key + ".txt", header, val, 0, "\t")
+        util.make_excel(WORK_DIR + "output/SY_Dominant_result_by_spacer_" + key, header, val)
+
 def main():
     logic = Logic.Logics()
     util = Util.Utils()
@@ -213,5 +299,6 @@ if __name__ == '__main__':
     start_time = time.perf_counter()
     print("start [ " + PROJECT_NAME + " ]>>>>>>>>>>>>>>>>>>")
     # multi_processing_for_whole_pam()
-    multi_processing_by_pam()
+    # split_multi_processing_for_whole_pam_by_PAM()
+    multi_processing_by_pam_w_whole_gene()
     print("::::::::::: %.2f seconds ::::::::::::::" % (time.perf_counter() - start_time))
