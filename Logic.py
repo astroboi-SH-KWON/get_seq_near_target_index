@@ -345,6 +345,12 @@ class Logics:
 
         print("DONE : ", key, " >>> get_seq_pam_in_orf")
 
+    def get_pos_ratio_in_cds(self, strand, idx, idx_list, pam_seq):
+        if strand == '+':
+            return (idx + 1 - self.len_clvg) / len(idx_list)
+        else:
+            return (len(idx_list) - idx - len(pam_seq) - self.len_clvg) / len(idx_list)
+
     def get_seq_clvg_pos_in_cds_w_whole_gene(self, ref_dir, key, init, result_list):
         def_nm = "get_seq_clvg_pos_in_cds_w_whole_gene"
         print("key : ", key, " , start >>> ", def_nm)
@@ -381,7 +387,7 @@ class Logics:
                 trgt_pam = p_trgt_seq[i: i + len(pam_seq)]
                 if self.match(0, trgt_pam, pam_seq):
 
-                    pos_ratio_cds = (i + 1 - self.len_clvg) / len(idx_list)
+                    pos_ratio_cds = self.get_pos_ratio_in_cds(strand, i, idx_list, pam_seq)
                     if ratio_f < pos_ratio_cds < ratio_b:
 
                         b_pam = p_trgt_seq[i + len(pam_seq): i + len(pam_seq) + len_b_pam]
@@ -393,14 +399,14 @@ class Logics:
                             f_pam += p_trgt_seq_f[- (len_f_pam - len(f_pam)):]
 
                         result_list.append(
-                            [chr_nm, gene_sym, nm_id, strand, idx_list[i - self.len_clvg], '+', f_pam[:22],
+                            [chr_nm, gene_sym, nm_id, strand, idx_list[i - self.len_clvg + 1], '+', f_pam[:22],
                              f_pam[22:len_f_pam], trgt_pam, b_pam, f_pam + trgt_pam + b_pam, pos_ratio_cds])
 
             for i in range(len(m_trgt_seq) - len(pam_seq) + 1):
                 trgt_pam = m_trgt_seq[i: i + len(pam_seq)]
                 if self.match(0, trgt_pam, pam_seq[::-1]):
 
-                    pos_ratio_cds = (len(idx_list) - i + len(pam_seq) + self.len_clvg) / len(idx_list)
+                    pos_ratio_cds = self.get_pos_ratio_in_cds(strand, i, idx_list, pam_seq)
                     if ratio_f < pos_ratio_cds < ratio_b:
 
                         b_pam = m_trgt_seq[i - len_b_pam: i]
@@ -412,9 +418,9 @@ class Logics:
                             f_pam += m_trgt_seq_f[:len_f_pam - len(f_pam)]
 
                         result_list.append(
-                            [chr_nm, gene_sym, nm_id, strand, idx_list[i - self.len_clvg], '-', f_pam[::-1][:22],
-                             f_pam[::-1][22:len_f_pam], trgt_pam[::-1], b_pam[::-1], (b_pam + trgt_pam + f_pam)[::-1],
-                             pos_ratio_cds])
+                            [chr_nm, gene_sym, nm_id, strand, idx_list[i + len(pam_seq) + self.len_clvg], '-',
+                             f_pam[::-1][:22], f_pam[::-1][22:len_f_pam], trgt_pam[::-1], b_pam[::-1],
+                             (b_pam + trgt_pam + f_pam)[::-1], pos_ratio_cds])
 
         print("DONE : ", key, " >>> ", def_nm)
 
@@ -541,3 +547,5 @@ class Logics:
                     return j + 1
                 else:
                     return total_exon - j
+
+

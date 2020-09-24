@@ -87,7 +87,7 @@ def multi_processing_by_pam_w_whole_gene():
         print("\nstart to make files for ", pam_nm, "\n")
         util.make_csv(WORK_DIR + "output/cleavage_pos_in_cds_w_whole_gene_" + pam_nm + ".txt", header,
                       sorted_result_list, 0, "\t")
-        util.make_excel(WORK_DIR + "output/cleavage_pos_in_cds_w_whole_gene_" + pam_nm, header, sorted_result_list)
+        # util.make_excel(WORK_DIR + "output/cleavage_pos_in_cds_w_whole_gene_" + pam_nm, header, sorted_result_list)
 
 def multi_processing_by_pam_w_mut():
     logic = Logic.Logics()

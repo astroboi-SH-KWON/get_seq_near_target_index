@@ -124,8 +124,11 @@ def test():
         #     print("False")
 
 def test2():
-    for i in range(5 - 3):
-        print(i)
+    tmp_list = ['0','1','2','3','4','5','6','7']
+    i = 5
+    print(tmp_list[5])
+    print(tmp_list[5 - 3])
+
 
 
 
