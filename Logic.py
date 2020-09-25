@@ -380,7 +380,7 @@ class Logics:
             p_trgt_seq_f = p_seq[start_idx_arr[0] - len_f_pam: start_idx_arr[0]]
             p_trgt_seq_b = p_seq[end_idx_arr[-1]: end_idx_arr[-1] + len_b_pam]
 
-            m_trgt_seq_f = m_seq[start_idx_arr[0]: start_idx_arr[0] + len_f_pam]
+            m_trgt_seq_f = m_seq[end_idx_arr[-1]: end_idx_arr[-1] + len_f_pam]
             m_trgt_seq_b = m_seq[start_idx_arr[0] - len_b_pam: start_idx_arr[0]]
 
             for i in range(len(p_trgt_seq) - len(pam_seq) + 1):
@@ -396,7 +396,7 @@ class Logics:
 
                         f_pam = p_trgt_seq[i - len_f_pam: i]
                         if len(f_pam) < len_f_pam:
-                            f_pam += p_trgt_seq_f[- (len_f_pam - len(f_pam)):]
+                            f_pam = p_trgt_seq_f[- (len_f_pam - len(f_pam)):] + f_pam
 
                         result_list.append(
                             [chr_nm, gene_sym, nm_id, strand, idx_list[i - self.len_clvg + 1], '+', f_pam[:22],
@@ -411,7 +411,7 @@ class Logics:
 
                         b_pam = m_trgt_seq[i - len_b_pam: i]
                         if len(b_pam) < len_b_pam:
-                            b_pam += m_trgt_seq_b[- (len_b_pam - len(b_pam)):]
+                            b_pam = m_trgt_seq_b[- (len_b_pam - len(b_pam)):] + b_pam
 
                         f_pam = m_trgt_seq[i + len(pam_seq): i + len(pam_seq) + len_f_pam]
                         if len(f_pam) < len_f_pam:
