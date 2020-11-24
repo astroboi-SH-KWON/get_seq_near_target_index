@@ -320,7 +320,7 @@ def make_filtered_mouse_ccds_current_file():
     # st plan A : filter out non Public, non Identical
     ccds_list = logic_prep.get_data_with_trgt_strng(ccds_list, 'Public', 5)
     ccds_list = logic_prep.get_data_with_trgt_strng(ccds_list, 'Identical', -1)
-    # get the lhighest num of ccds_id in each gene
+    # get the highest num of ccds_id in each gene
     ccds_list = logic_prep.get_high_ccds_id_among_same_gen_id(ccds_list)
     # en plan A
 
