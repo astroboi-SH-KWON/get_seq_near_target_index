@@ -83,7 +83,6 @@ class LogicPreps:
         result_list = []
         for split_list in pool_list:
             result_list.extend(split_list)
-
         return result_list
 
     def filter_out_NON_NM_id_in_cds_list(self, cds_list):
@@ -131,6 +130,71 @@ class LogicPreps:
                 result_dict.update({val_arr[key_idx]: [val_arr]})
         return result_dict
 
+    def get_data_with_trgt_strng(self, ccds_list, trgt_str, idx):
+        return [cds_arr for cds_arr in ccds_list if cds_arr[idx] == trgt_str]
+
+    def get_high_ccds_id_among_same_gen_id(self, ccds_list):
+        gen_id_dict = {}
+        result_list = []
+        for ccds_arr in ccds_list:
+            gene = ccds_arr[2]
+            ccds_id = ''.join(x for x in ccds_arr[4] if x.isdigit())
+            ccds_arr.append(ccds_id)
+            if gene in gen_id_dict:
+                gen_id_dict[gene].append(ccds_arr)
+            else:
+                gen_id_dict.update({gene: [ccds_arr]})
+
+        for ccds_list in gen_id_dict.values():
+            """
+            sangyeon  오후 6:16 20201123
+            그리고 CCDS id의 순선는 큰 숫자가 더 최근에 나온 data네요!
+            """
+            sorted_ccds_list = self.sort_list_by_ele(ccds_list, -1, True)
+            result_list.append(sorted_ccds_list[0][:-1])
+        return result_list
 
 
+    """
+    mouse_ccds form : 
+        #chromosome	nc_accession	gene	gene_id	ccds_id	ccds_status	cds_strand	cds_from	cds_to	cds_locations	match_type
+    hg38_refFlat form : 
+        GeneSym   NMID    Chrom   Strand  Transcript_Start   End ORFStart    End #Exon   ExonS_list  ExonE_list
+    
+    GeneSyn = gene
+    NMID = ccds_id (이 부분은 human을 filter하실 때, gene 하나당 NMID가 여러개였던걸 줄이신거면 동일한 것으로 생각됩니다)
+    Chrom = #chromosome
+    Strand = cds_strand
+    Transcript_Start =
+    End =
+    ORF Start = cds_from
+    End = cds_to
+    #Exon, ExonS_list, ExonE_list = cds_locations
+    """
+    def transform_mouse_ccds_form_to_hg38_refFlat(self, ccds_list):
+        result_list = []
+        for ccds_arr in ccds_list:
+            gene_sym = ccds_arr[2]
+            nm_id = ccds_arr[4]
+            chrom = 'chr' + str(ccds_arr[0])
+            strand = ccds_arr[6]
 
+            transcript_st = ccds_arr[7]
+            transcript_en = ccds_arr[8]
+            orf_st = ccds_arr[7]
+            orf_en = ccds_arr[8]
+
+            cds_locations_arr = re.findall('\d+', ccds_arr[9])
+            num_exon = len(cds_locations_arr) // 2
+            exon_s_list = ''
+            for cds_loc in [cds_locations_arr[i] for i in range(len(cds_locations_arr)) if i % 2 == 0]:
+                exon_s_list = exon_s_list + str(cds_loc) + ','
+            exon_e_list = ''
+            for cds_loc in [cds_locations_arr[i] for i in range(len(cds_locations_arr)) if i % 2 != 0]:
+                exon_e_list = exon_e_list + str(cds_loc) + ','
+
+            result_list.append(
+                [gene_sym, nm_id, chrom, strand, transcript_st, transcript_en, orf_st, orf_en, num_exon, exon_s_list,
+                 exon_e_list])
+
+        return result_list
