@@ -548,4 +548,10 @@ class Logics:
                 else:
                     return total_exon - j
 
-
+    def check_strand(self, p_seq, m_seq, trgt_seq):
+        if p_seq == trgt_seq:
+            return '+'
+        elif m_seq == trgt_seq:
+            return '-'
+        else:
+            return

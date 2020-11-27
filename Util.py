@@ -1,7 +1,7 @@
 import glob
 from Bio import SeqIO
 import openpyxl
-import os
+import pandas as pd
 
 class Utils:
     def __init__(self):
@@ -77,3 +77,12 @@ class Utils:
         for val_list in input_dict.values():
             result_list.extend(val_list)
         return result_list
+
+
+    # conda install -c anaconda xlrd
+    def get_sheet_names(self, path):
+        df = pd.read_excel(path, None)
+        return [k for k in df.keys()]
+
+    def read_excel_to_df(self, path, sheet_name='Sheet1'):
+        return pd.read_excel(path, sheet_name=sheet_name)
