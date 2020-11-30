@@ -351,6 +351,13 @@ class Logics:
         else:
             return (len(idx_list) - idx - len(pam_seq) - self.len_clvg) / len(idx_list)
 
+    def get_pos_ratio_in_cds_by_full_idx(self, strand, cdn_idx, idx_list, pam_seq):
+        idx = idx_list.index(cdn_idx)
+        if strand == '+':
+            return (idx + 1 - self.len_clvg) / len(idx_list)
+        else:
+            return (len(idx_list) - idx - len(pam_seq) - self.len_clvg) / len(idx_list)
+
     def get_seq_clvg_pos_in_cds_w_whole_gene(self, ref_dir, key, init, result_list):
         def_nm = "get_seq_clvg_pos_in_cds_w_whole_gene"
         print("key : ", key, " , start >>> ", def_nm)
@@ -374,53 +381,34 @@ class Logics:
 
             start_idx_arr, end_idx_arr = logic_prep.get_orf_strt_end_idx_arr(cds_arr)
             idx_list = logic_prep.get_idx_num_frm_strt_to_end_list(start_idx_arr, end_idx_arr)
-            p_trgt_seq = logic_prep.get_seq_by_idx_arr(p_seq, start_idx_arr, end_idx_arr)
-            m_trgt_seq = logic_prep.get_seq_by_idx_arr(m_seq, start_idx_arr, end_idx_arr)
 
-            p_trgt_seq_f = p_seq[start_idx_arr[0] - len_f_pam: start_idx_arr[0]]
-            p_trgt_seq_b = p_seq[end_idx_arr[-1]: end_idx_arr[-1] + len_b_pam]
+            for clvg_site in idx_list:
+                # TODO
+                if self.is_edge(clvg_site, start_idx_arr, end_idx_arr):
+                    continue
 
-            m_trgt_seq_f = m_seq[end_idx_arr[-1]: end_idx_arr[-1] + len_f_pam]
-            m_trgt_seq_b = m_seq[start_idx_arr[0] - len_b_pam: start_idx_arr[0]]
+                pos_ratio_cds = self.get_pos_ratio_in_cds_by_full_idx(strand, clvg_site, idx_list, pam_seq)
+                if ratio_f < pos_ratio_cds < ratio_b:
+                    trgt_p_pam = p_seq[clvg_site + self.len_clvg: clvg_site + self.len_clvg + len(pam_seq)]
+                    trgt_m_pam = m_seq[clvg_site - self.len_clvg - len(pam_seq): clvg_site - self.len_clvg][::-1]
 
-            for i in range(len(p_trgt_seq) - len(pam_seq) + 1):
-                trgt_pam = p_trgt_seq[i: i + len(pam_seq)]
-                if self.match(0, trgt_pam, pam_seq):
-
-                    pos_ratio_cds = self.get_pos_ratio_in_cds(strand, i, idx_list, pam_seq)
-                    if ratio_f < pos_ratio_cds < ratio_b:
-
-                        b_pam = p_trgt_seq[i + len(pam_seq): i + len(pam_seq) + len_b_pam]
-                        if len(b_pam) < len_b_pam:
-                            b_pam += p_trgt_seq_b[:len_b_pam - len(b_pam)]
-
-                        f_pam = p_trgt_seq[i - len_f_pam: i]
-                        if len(f_pam) < len_f_pam:
-                            f_pam = p_trgt_seq_f[- (len_f_pam - len(f_pam)):] + f_pam
-
+                    if self.match(0, trgt_p_pam, pam_seq):
+                        trgt_full_p_seq = p_seq[clvg_site + self.len_clvg - len_f_pam: clvg_site + self.len_clvg + len(
+                            pam_seq) + len_b_pam]
+                        trgt_p_seq = p_seq[clvg_site + self.len_clvg - 22: clvg_site + self.len_clvg + len(
+                            pam_seq) + len_b_pam]
                         result_list.append(
-                            [chr_nm, gene_sym, nm_id, strand, idx_list[i - self.len_clvg + 1], '+', f_pam[:22],
-                             f_pam[22:len_f_pam], trgt_pam, b_pam, f_pam + trgt_pam + b_pam, pos_ratio_cds])
+                            [chr_nm, gene_sym, nm_id, strand, clvg_site + 1, '+', trgt_p_seq[:22], trgt_p_seq[22:len_f_pam],
+                             trgt_p_pam, trgt_p_seq[- len_b_pam:], trgt_full_p_seq, pos_ratio_cds])
 
-            for i in range(len(m_trgt_seq) - len(pam_seq) + 1):
-                trgt_pam = m_trgt_seq[i: i + len(pam_seq)]
-                if self.match(0, trgt_pam, pam_seq[::-1]):
-
-                    pos_ratio_cds = self.get_pos_ratio_in_cds(strand, i + 1, idx_list, pam_seq)
-                    if ratio_f < pos_ratio_cds < ratio_b:
-
-                        b_pam = m_trgt_seq[i - len_b_pam: i]
-                        if len(b_pam) < len_b_pam:
-                            b_pam = m_trgt_seq_b[- (len_b_pam - len(b_pam)):] + b_pam
-
-                        f_pam = m_trgt_seq[i + len(pam_seq): i + len(pam_seq) + len_f_pam]
-                        if len(f_pam) < len_f_pam:
-                            f_pam += m_trgt_seq_f[:len_f_pam - len(f_pam)]
-
-                        result_list.append(
-                            [chr_nm, gene_sym, nm_id, strand, idx_list[i + len(pam_seq) + self.len_clvg + 1], '-',
-                             f_pam[::-1][:22], f_pam[::-1][22:len_f_pam], trgt_pam[::-1], b_pam[::-1],
-                             (b_pam + trgt_pam + f_pam)[::-1], pos_ratio_cds])
+                    if self.match(0, trgt_m_pam, pam_seq):
+                        trgt_full_m_seq = m_seq[clvg_site - self.len_clvg - len(
+                            pam_seq) - len_b_pam: clvg_site - self.len_clvg + len_f_pam][::-1]
+                        trgt_m_seq = m_seq[clvg_site - self.len_clvg - len(
+                            pam_seq) - len_b_pam: clvg_site - self.len_clvg + 22][::-1]
+                        result_list.append([chr_nm, gene_sym, nm_id, strand, clvg_site + 1, '-', trgt_m_seq[:22],
+                                            trgt_m_seq[22:len_f_pam], trgt_m_pam, trgt_m_seq[- len_b_pam:],
+                                            trgt_full_m_seq, pos_ratio_cds])
 
         print("DONE : ", key, " >>> ", def_nm)
 
@@ -555,3 +543,10 @@ class Logics:
             return '-'
         else:
             return
+
+    def is_edge(self, idx, start_idx_arr, end_idx_arr):
+        if idx in start_idx_arr:
+            return True
+        elif idx in end_idx_arr:
+            return True
+        return False

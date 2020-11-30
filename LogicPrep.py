@@ -72,6 +72,16 @@ class LogicPreps:
         return result_seq
 
 
+    def get_seq_arr_by_idx_arr(self, full_seq, start_idx_arr, end_idx_arr):
+        result_list = []
+        for idx in range(len(start_idx_arr)):
+            nxt_idx = int(start_idx_arr[idx])
+            end_idx = int(end_idx_arr[idx])
+            result_list.append(full_seq[nxt_idx: end_idx])
+
+        return result_list
+
+
     def add_result_seq_to_arr(self, mut_arr, data_dict):
         tmp_str = ""
         for tmp_arr in data_dict.values():

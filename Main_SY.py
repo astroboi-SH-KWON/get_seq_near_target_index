@@ -14,7 +14,9 @@ SYSTEM_NM = platform.system()
 if SYSTEM_NM == 'Linux':
     # REAL
     # REF_DIR = "/media/backup/ref/hg38/"
-    REF_DIR = "/media/backup/ref/GRCm38_p6_mouse/"  # 20201123 mouse
+    # REF_DIR = "/media/backup/ref/GRCm38_p6_mouse/"  # 20201123 mouse
+    REF_DIR = "/media/backup/ref/Ensemble_GRCm38.p6/"  # 20201130 mouse
+    # REF_DIR = "/media/backup/ref/Ensemble_GRCh38.p13/"  # 20201130 human
 else:
     # DEV
     REF_DIR = "D:/000_WORK/000_reference_path/human/hg38/Splited/"
@@ -22,7 +24,9 @@ else:
 PROJECT_NAME = WORK_DIR.split("/")[-2]
 MUT_INFO = "200907_Dominant filter.txt"
 # FILTERED_CDS_INFO = "filtered_hg38_refFlat.txt"
-FILTERED_CDS_INFO = "filtered_CCDS.current.txt"  # 20201123 mouse
+# FILTERED_CDS_INFO = "filtered_CCDS.current.txt"  # 20201123 mouse
+FILTERED_CDS_INFO = "filtered_201130_CCDS_mouse_current.txt"  # 20201130 mouse
+# FILTERED_CDS_INFO = "filtered_201130_CCDS_human_current.txt"  # 20201130 human
 RESULT_FILE = "SY_Dominant_result_by_spacer.txt"
 
 OTHOLOG = ['SaCas9', 'SaCas9_KKH', 'SaCas9_NNG', 'St1Cas9', 'Nm1Cas9', 'Nm2Cas9', 'CjCas9']
@@ -312,10 +316,10 @@ def make_filtered_mouse_ccds_current_file():
 
     ccds_list = []
     if SYSTEM_NM == 'Linux':
-        ccds_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/CCDS.current.txt", "\t", 0))
+        ccds_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/201130_CCDS_human_current.txt", "\t", 0))
     else:
         # ccds_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/CCDS.current.txt", "\t", 0)[:3000])
-        ccds_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/CCDS.current.txt", "\t", 0))
+        ccds_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/201130_CCDS_human_current.txt", "\t", 0))
 
     # st plan A : filter out non Public, non Identical
     ccds_list = logic_prep.get_data_with_trgt_strng(ccds_list, 'Public', 5)
@@ -333,7 +337,7 @@ def make_filtered_mouse_ccds_current_file():
         os.remove(WORK_DIR + "input/filtered_CCDS.current.txt")
     except Exception as err:
         print('os.remove(WORK_DIR + "input/filtered_CCDS.current.txt") : ', str(err))
-    util.make_csv(WORK_DIR + "input/filtered_CCDS.current.txt", header, ccds_hg38_form_list, 0, "\t")
+    util.make_csv(WORK_DIR + "input/filtered_201130_CCDS_human_current.txt", header, ccds_hg38_form_list, 0, "\t")
 
 
 if __name__ == '__main__':
