@@ -406,7 +406,7 @@ class Logics:
                 trgt_pam = m_trgt_seq[i: i + len(pam_seq)]
                 if self.match(0, trgt_pam, pam_seq[::-1]):
 
-                    pos_ratio_cds = self.get_pos_ratio_in_cds(strand, i, idx_list, pam_seq)
+                    pos_ratio_cds = self.get_pos_ratio_in_cds(strand, i + 1, idx_list, pam_seq)
                     if ratio_f < pos_ratio_cds < ratio_b:
 
                         b_pam = m_trgt_seq[i - len_b_pam: i]
@@ -418,7 +418,7 @@ class Logics:
                             f_pam += m_trgt_seq_f[:len_f_pam - len(f_pam)]
 
                         result_list.append(
-                            [chr_nm, gene_sym, nm_id, strand, idx_list[i + len(pam_seq) + self.len_clvg], '-',
+                            [chr_nm, gene_sym, nm_id, strand, idx_list[i + len(pam_seq) + self.len_clvg + 1], '-',
                              f_pam[::-1][:22], f_pam[::-1][22:len_f_pam], trgt_pam[::-1], b_pam[::-1],
                              (b_pam + trgt_pam + f_pam)[::-1], pos_ratio_cds])
 
