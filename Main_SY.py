@@ -25,8 +25,10 @@ PROJECT_NAME = WORK_DIR.split("/")[-2]
 MUT_INFO = "200907_Dominant filter.txt"
 # FILTERED_CDS_INFO = "filtered_hg38_refFlat.txt"
 # FILTERED_CDS_INFO = "filtered_CCDS.current.txt"  # 20201123 mouse
-FILTERED_CDS_INFO = "filtered_201130_CCDS_mouse_current.txt"  # 20201130 mouse
+# FILTERED_CDS_INFO = "filtered_201130_CCDS_mouse_current.txt"  # 20201130 mouse
 # FILTERED_CDS_INFO = "filtered_201130_CCDS_human_current.txt"  # 20201130 human
+FILTERED_CDS_INFO = "filtered_shortest_cdn_CCDS_mouse.txt"  # 20201201 mouse
+# FILTERED_CDS_INFO = "filtered_shortest_cdn_CCDS_human.txt"  # 20201201 human
 RESULT_FILE = "SY_Dominant_result_by_spacer.txt"
 
 OTHOLOG = ['SaCas9', 'SaCas9_KKH', 'SaCas9_NNG', 'St1Cas9', 'Nm1Cas9', 'Nm2Cas9', 'CjCas9']
@@ -46,9 +48,7 @@ INIT_BY_PAM = [
     , ['Nm2Cas9', 'NNNNCC', 44, 3, WIN_SIZE, RATIO]
     , ['CjCas9', 'NNNNRYAC', 44, 3, WIN_SIZE, RATIO]
 ]
-# INIT_BY_PAM = [
-#     ['SaCas9', 'NNGRRT', 43, 3, WIN_SIZE, RATIO]
-# ]
+
 TOTAL_CPU = mp.cpu_count()
 MULTI_CNT = int(TOTAL_CPU*0.8)
 ############### end setting env #################
@@ -90,15 +90,24 @@ def multi_processing_by_pam_w_whole_gene():
         for ret_proc in jobs:
             ret_proc.join()
 
-        header = ['chr_nm', 'gene_sym', 'nm_id', 'transcrpt_strand', 'pos_clvg', 'pam_strand', '22 bp', 'spacer', 'PAM',
-                  '3bp', str(len_f_pam) + 'bp + PAM + ' + str(len_b_pam) + 'bp', 'clvg_site_ratio']
+        header = ['chr_nm', 'gene_sym', 'nm_id', 'transcrpt_strand', 'pos_clvg', 'pam_strand', 'context (22 bp)',
+                  'spacer (21 bp)', 'PAM', '3 bp', str(len_f_pam) + ' bp + PAM + ' + str(len_b_pam) + ' bp',
+                  'clvg_site_ratio']
 
         sorted_result_list = logic_prep.sort_list_by_ele(result_list, 0, False)
+        # clear ListProxy
+        result_list[:] = []
         print("\nstart to make files for ", pam_nm, "\n")
-        util.make_csv(WORK_DIR + "output/cleavage_pos_in_cds_w_whole_mouse_gene_" + pam_nm + ".txt", header,
+        util.make_csv(WORK_DIR + "output/cleavage_pos_in_shortest_cds_w_whole_mouse_gene_" + pam_nm + ".txt", header,
                       sorted_result_list, 0, "\t")
-        if pam_nm != 'SaCas9_NNG':
-            util.make_excel(WORK_DIR + "output/cleavage_pos_in_cds_w_whole_mouse_gene_" + pam_nm, header, sorted_result_list)
+        try:
+            print(len(sorted_result_list))
+            if pam_nm in ['SaCas9_NNG']:
+                continue
+            util.make_excel(WORK_DIR + "output/cleavage_pos_in_shortest_cds_w_whole_mouse_gene_" + pam_nm, header,
+                            sorted_result_list)
+        except Exception as err:
+            print('[ERROR] during making excel file for ' + pam_nm + '\n', str(err))
 
 
 def multi_processing_by_pam_w_mut():
@@ -325,7 +334,7 @@ def make_filtered_mouse_ccds_current_file():
     ccds_list = logic_prep.get_data_with_trgt_strng(ccds_list, 'Public', 5)
     ccds_list = logic_prep.get_data_with_trgt_strng(ccds_list, 'Identical', -1)
     # get the highest num of ccds_id in each gene
-    ccds_list = logic_prep.get_high_ccds_id_among_same_gen_id(ccds_list)
+    ccds_list = logic_prep.get_highest_ccds_id_among_same_gen_id(ccds_list)
     # en plan A
 
     ccds_hg38_form_list = logic_prep.transform_mouse_ccds_form_to_hg38_refFlat(ccds_list)
@@ -340,6 +349,36 @@ def make_filtered_mouse_ccds_current_file():
     util.make_csv(WORK_DIR + "input/filtered_201130_CCDS_human_current.txt", header, ccds_hg38_form_list, 0, "\t")
 
 
+def make_filtered_ccds_current_file_by_shortest_cdn():
+    logic_prep = LogicPrep.LogicPreps()
+    util = Util.Utils()
+
+    ccds_list = []
+    if SYSTEM_NM == 'Linux':
+        ccds_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/201130_CCDS_human_current.txt", "\t", 0))
+    else:
+        # ccds_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/CCDS.current.txt", "\t", 0)[:3000])
+        ccds_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/201130_CCDS_human_current.txt", "\t", 0))
+
+    # st plan A : filter out non Public, non Identical
+    ccds_list = logic_prep.get_data_with_trgt_strng(ccds_list, 'Public', 5)
+    ccds_list = logic_prep.get_data_with_trgt_strng(ccds_list, 'Identical', -1)
+
+    ccds_hg38_form_list = logic_prep.transform_mouse_ccds_form_to_hg38_refFlat(ccds_list)
+
+    filted_ccds_list = logic_prep.get_shortest_cdn_among_same_gen_id(ccds_hg38_form_list)  # 20201201
+    # en plan A
+
+    header = ['GeneSym', 'NMID', 'Chrom', 'Strand', 'Transcript_Start', 'End', 'ORFStart', 'End', '#Exon', 'ExonS_list',
+              'ExonE_list']
+
+    try:
+        os.remove(WORK_DIR + "input/filtered_shortest_cdn_CCDS_human.txt")
+    except Exception as err:
+        print('os.remove(WORK_DIR + "input/filtered_CCDS.current.txt") : ', str(err))
+    util.make_csv(WORK_DIR + "input/filtered_shortest_cdn_CCDS_human.txt", header, filted_ccds_list, 0, "\t")
+
+
 if __name__ == '__main__':
     start_time = time.perf_counter()
     print("start [ " + PROJECT_NAME + " ]>>>>>>>>>>>>>>>>>>")
@@ -347,4 +386,5 @@ if __name__ == '__main__':
     # split_multi_processing_for_whole_pam_by_PAM()
     multi_processing_by_pam_w_whole_gene()
     # make_filtered_mouse_ccds_current_file()
+    # make_filtered_ccds_current_file_by_shortest_cdn()  # 20201201
     print("::::::::::: %.2f seconds ::::::::::::::" % (time.perf_counter() - start_time))

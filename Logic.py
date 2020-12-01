@@ -9,6 +9,8 @@ class Logics:
         self.strt_cd_arr = ['ATG']
         self.end_cd_arr = ['TGA', 'TAG', 'TAA']
         self.len_clvg = 3
+        self.len_spcr = 21
+        self.len_contxt = 22
 
     def complement_char(self, ch):
         complement_char_dict = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', 'N': 'N'}
@@ -396,21 +398,24 @@ class Logics:
                     if self.match(0, trgt_p_pam, pam_seq):
                         trgt_full_p_seq = p_seq[clvg_site + self.len_clvg - len_f_pam: clvg_site + self.len_clvg + len(
                             pam_seq) + len_b_pam]
-                        trgt_p_seq = p_seq[clvg_site + self.len_clvg - 22: clvg_site + self.len_clvg + len(
-                            pam_seq) + len_b_pam]
+                        trgt_p_seq = p_seq[
+                                     clvg_site + self.len_clvg - self.len_spcr - self.len_contxt: clvg_site + self.len_clvg + len(
+                                         pam_seq) + len_b_pam]
                         result_list.append(
-                            [chr_nm, gene_sym, nm_id, strand, clvg_site + 1, '+', trgt_p_seq[:22], trgt_p_seq[22:],
-                             trgt_p_pam, trgt_p_seq[- len_b_pam:], trgt_full_p_seq, pos_ratio_cds])
+                            [chr_nm, gene_sym, nm_id, strand, clvg_site + 1, '+', trgt_p_seq[:self.len_contxt],
+                             trgt_p_seq[self.len_contxt: self.len_contxt + self.len_spcr], trgt_p_pam,
+                             trgt_p_seq[- len_b_pam:], trgt_full_p_seq, pos_ratio_cds])
 
                     # check - strand
                     if self.match(0, trgt_m_pam, pam_seq):
                         trgt_full_m_seq = m_seq[clvg_site - self.len_clvg - len(
                             pam_seq) - len_b_pam: clvg_site - self.len_clvg + len_f_pam][::-1]
                         trgt_m_seq = m_seq[clvg_site - self.len_clvg - len(
-                            pam_seq) - len_b_pam: clvg_site - self.len_clvg + 22][::-1]
+                            pam_seq) - len_b_pam: clvg_site - self.len_clvg + self.len_spcr + self.len_contxt][::-1]
                         result_list.append(
-                            [chr_nm, gene_sym, nm_id, strand, clvg_site + 1, '-', trgt_m_seq[:22], trgt_m_seq[22:],
-                             trgt_m_pam, trgt_m_seq[- len_b_pam:], trgt_full_m_seq, pos_ratio_cds])
+                            [chr_nm, gene_sym, nm_id, strand, clvg_site + 1, '-', trgt_m_seq[:self.len_contxt],
+                             trgt_m_seq[self.len_contxt: self.len_contxt + self.len_spcr], trgt_p_pam,
+                             trgt_m_seq[- len_b_pam:], trgt_full_m_seq, pos_ratio_cds])
 
         print("DONE : ", key, " >>> ", def_nm)
 

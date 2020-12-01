@@ -143,7 +143,7 @@ class LogicPreps:
     def get_data_with_trgt_strng(self, ccds_list, trgt_str, idx):
         return [cds_arr for cds_arr in ccds_list if cds_arr[idx] == trgt_str]
 
-    def get_high_ccds_id_among_same_gen_id(self, ccds_list):
+    def get_highest_ccds_id_among_same_gen_id(self, ccds_list):
         gen_id_dict = {}
         result_list = []
         for ccds_arr in ccds_list:
@@ -207,4 +207,29 @@ class LogicPreps:
                 [gene_sym, nm_id, chrom, strand, transcript_st, transcript_en, orf_st, orf_en, num_exon, exon_s_list,
                  exon_e_list])
 
+        return result_list
+
+
+    """
+    CCDS_id가 여러개인 gene에서 하나씩만 가져오는 기준이 
+    현재는 가장 최근의 CCDS_id만을 가져오는 방식으로 filter를 했었는데, ==> self.get_highest_ccds_id_among_same_gen_id
+    혹시 이 부분을 가장 짧은 cds를 가지는 CCDS_id로 가져오게 변경해서 다시 뽑아주실 수 있나요? 
+    """
+    def get_shortest_cdn_among_same_gen_id(self, ccds_hg38_form_list):
+        gen_id_dict = {}
+        result_list = []
+        for ccds_arr in ccds_hg38_form_list:
+            gene = ccds_arr[0]
+            start_idx_arr, end_idx_arr = self.get_orf_strt_end_idx_arr(ccds_arr)
+            idx_list = self.get_idx_num_frm_strt_to_end_list(start_idx_arr, end_idx_arr)
+            ccds_arr.append(len(idx_list))
+            if gene in gen_id_dict:
+                gen_id_dict[gene].append(ccds_arr)
+            else:
+                gen_id_dict.update({gene: [ccds_arr]})
+
+        for ccds_list in gen_id_dict.values():
+
+            sorted_ccds_list = self.sort_list_by_ele(ccds_list, -1, False)
+            result_list.append(sorted_ccds_list[0][:-1])
         return result_list
