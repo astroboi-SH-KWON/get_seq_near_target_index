@@ -15,8 +15,8 @@ if SYSTEM_NM == 'Linux':
     # REAL
     # REF_DIR = "/media/backup/ref/hg38/"
     # REF_DIR = "/media/backup/ref/GRCm38_p6_mouse/"  # 20201123 mouse
-    REF_DIR = "/media/backup/ref/Ensemble_GRCm38.p6/"  # 20201130 mouse
-    # REF_DIR = "/media/backup/ref/Ensemble_GRCh38.p13/"  # 20201130 human
+    REF_DIR = "/media/backup/ref/Ensemble_GRCm38_p6/"  # 20201130 mouse
+    # REF_DIR = "/media/backup/ref/Ensemble_GRCh38_p13/"  # 20201130 human
 else:
     # DEV
     REF_DIR = "D:/000_WORK/000_reference_path/human/hg38/Splited/"

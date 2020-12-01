@@ -383,8 +383,8 @@ class Logics:
             idx_list = logic_prep.get_idx_num_frm_strt_to_end_list(start_idx_arr, end_idx_arr)
 
             for clvg_site in idx_list:
-                # TODO
-                if self.is_edge(clvg_site, start_idx_arr, end_idx_arr):
+                # filter out the edge index of codons
+                if self.is_in_list(clvg_site, start_idx_arr) and self.is_in_list(clvg_site, end_idx_arr):
                     continue
 
                 pos_ratio_cds = self.get_pos_ratio_in_cds_by_full_idx(strand, clvg_site, idx_list, pam_seq)
@@ -392,23 +392,25 @@ class Logics:
                     trgt_p_pam = p_seq[clvg_site + self.len_clvg: clvg_site + self.len_clvg + len(pam_seq)]
                     trgt_m_pam = m_seq[clvg_site - self.len_clvg - len(pam_seq): clvg_site - self.len_clvg][::-1]
 
+                    # check + strand
                     if self.match(0, trgt_p_pam, pam_seq):
                         trgt_full_p_seq = p_seq[clvg_site + self.len_clvg - len_f_pam: clvg_site + self.len_clvg + len(
                             pam_seq) + len_b_pam]
                         trgt_p_seq = p_seq[clvg_site + self.len_clvg - 22: clvg_site + self.len_clvg + len(
                             pam_seq) + len_b_pam]
                         result_list.append(
-                            [chr_nm, gene_sym, nm_id, strand, clvg_site + 1, '+', trgt_p_seq[:22], trgt_p_seq[22:len_f_pam],
+                            [chr_nm, gene_sym, nm_id, strand, clvg_site + 1, '+', trgt_p_seq[:22], trgt_p_seq[22:],
                              trgt_p_pam, trgt_p_seq[- len_b_pam:], trgt_full_p_seq, pos_ratio_cds])
 
+                    # check - strand
                     if self.match(0, trgt_m_pam, pam_seq):
                         trgt_full_m_seq = m_seq[clvg_site - self.len_clvg - len(
                             pam_seq) - len_b_pam: clvg_site - self.len_clvg + len_f_pam][::-1]
                         trgt_m_seq = m_seq[clvg_site - self.len_clvg - len(
                             pam_seq) - len_b_pam: clvg_site - self.len_clvg + 22][::-1]
-                        result_list.append([chr_nm, gene_sym, nm_id, strand, clvg_site + 1, '-', trgt_m_seq[:22],
-                                            trgt_m_seq[22:len_f_pam], trgt_m_pam, trgt_m_seq[- len_b_pam:],
-                                            trgt_full_m_seq, pos_ratio_cds])
+                        result_list.append(
+                            [chr_nm, gene_sym, nm_id, strand, clvg_site + 1, '-', trgt_m_seq[:22], trgt_m_seq[22:],
+                             trgt_m_pam, trgt_m_seq[- len_b_pam:], trgt_full_m_seq, pos_ratio_cds])
 
         print("DONE : ", key, " >>> ", def_nm)
 
@@ -544,9 +546,7 @@ class Logics:
         else:
             return
 
-    def is_edge(self, idx, start_idx_arr, end_idx_arr):
-        if idx in start_idx_arr:
-            return True
-        elif idx in end_idx_arr:
+    def is_in_list(self, idx, check_list):
+        if idx in check_list:
             return True
         return False
