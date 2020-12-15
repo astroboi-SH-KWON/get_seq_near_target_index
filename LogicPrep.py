@@ -51,7 +51,6 @@ class LogicPreps:
         sorted_end_idx_arr = sorted(end_idx_arr)
         strt_idx = sorted_start_idx_arr.index(orf_strt_idx)
         end_idx = sorted_end_idx_arr.index(orf_end_idx)
-
         return sorted_start_idx_arr[strt_idx: end_idx + 1], sorted_end_idx_arr[strt_idx: end_idx + 1]
 
     def get_idx_num_frm_strt_to_end_list(self, start_idx_arr, end_idx_arr):
