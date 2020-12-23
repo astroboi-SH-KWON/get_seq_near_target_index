@@ -29,7 +29,9 @@ CjCas9		    |           |22 nt	|NNNNRYAC   |
 
 fig.2 Example, SaCas9-NNG (PAM: 5’-NNG-3’)
 ![alt text](./fig_2.PNG)
+
 Arrow는 guide + PAM을 나타냄
+
 Blue, orange, red (같은 gene 내의 다른 부위에 PAM을 가지는 같은 guide 서열이 존재)는 탈락
 따라서, black만 통과
 
@@ -39,3 +41,23 @@ Blue, orange, red (같은 gene 내의 다른 부위에 PAM을 가지는 같은 g
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 input : 
     ALL_CDS_INFO = "all_ccds_filtered_201130_CCDS_" + TYPE + "_current.txt"  # 20201217
+    MUT_INFO = [ClinVar_data : ./input/200907_Dominant filter.txt](./input/200907_Dominant filter.txt)
+    
+ 
+1. get rows in ClinVar_data(= MUT_INFO) if POS is in CDS(ALL_CDS_INFO) 
+    1-1. get seq pairs with WIN_SIZE near target seq(= POS column in ClinVar_data, len(REF column)) in CDS not in whole genome
+    
+
+
+
+??????????    
+len(ref in cds) = 100
+60 bp + ALT + 60 bp > 120
+
+len(ref in cds) = 500
+60 bp + ALT + 60 bp > 120
+=> should start after 121 in (ref in cds)
+
+
+
+
