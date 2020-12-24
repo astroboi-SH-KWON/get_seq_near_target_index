@@ -30,7 +30,9 @@ input :
 
 
 * how to find guide + PAM
-    plan_A : search PAM in each CDS regions    ????? get guide seq from whole genome if guide is out of CDS ?????
+    plan_A : search PAM in each CDS regions ( get guide seq from whole genome if guide is out of CDS )
+             gene info, POS existance from CCDS 
+             seq from whole-genome sequence
     plan_B : search PAM in only ALT part from WIN_SIZE + ALT + WIN_SIZE (both of WIN_SIZEs are from whole genome)
     
     plan_A for REF, plan_B for ALT
