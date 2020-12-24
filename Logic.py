@@ -111,7 +111,7 @@ class Logics:
 
         p_first_pam_pos = len(p_ori_win_f_seq) - len_pam + 1
 
-        for i in range(len_pam + len_ref_seq - 1):
+        for i in range(len(p_ori_win_b_seq) + len_ref_seq):
             p_ref_pam_seq = p_ori_win_seq[i + p_first_pam_pos: i + p_first_pam_pos + len_pam]
             if self.match_SY(0, p_ref_pam_seq, pam):
                 p_seq_f_pam = p_ori_win_seq[i + p_first_pam_pos - len_f_pam: i + p_first_pam_pos]
@@ -134,7 +134,7 @@ class Logics:
 
         m_first_pam_pos = len(m_ori_win_f_seq) - len_pam + 1
 
-        for i in range(len_pam + len_ref_seq - 1):
+        for i in range(len(m_ori_win_b_seq) + len_ref_seq):
             m_ref_pam_seq = m_ori_win_seq[i + m_first_pam_pos: i + m_first_pam_pos + len_pam]
             if self.match_SY(0, m_ref_pam_seq, pam[::-1]):
                 m_seq_f_pam = m_ori_win_seq[i + m_first_pam_pos + len_pam: i + m_first_pam_pos + len_pam + len_f_pam]
@@ -242,10 +242,11 @@ class Logics:
         pam_arr = init[1]
         len_f_pam_arr = init[2]
         len_b_pam_arr = init[3]
+        adj_ref_idx = init[4]
 
         for mut_arr in mut_list:
             chr_num = mut_arr[0]
-            pos = int(mut_arr[1]) - 1
+            pos = int(mut_arr[1]) + adj_ref_idx
             ref_p_seq = mut_arr[3]
             alt_p_seq = mut_arr[4]
 

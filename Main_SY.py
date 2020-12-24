@@ -11,34 +11,46 @@ import LogicPrep
 ############### start to set env ################
 WORK_DIR = os.getcwd() + "/"
 SYSTEM_NM = platform.system()
+TYPE = 'mouse'
+# TYPE = 'human'
 if SYSTEM_NM == 'Linux':
     # REAL
     # REF_DIR = "/media/backup/ref/hg38/"
     # REF_DIR = "/media/backup/ref/GRCm38_p6_mouse/"  # 20201123 mouse
-    REF_DIR = "/media/backup/ref/Ensemble_GRCm38_p6/"  # 20201130 mouse
-    # REF_DIR = "/media/backup/ref/Ensemble_GRCh38_p13/"  # 20201130 human
+    if TYPE == 'mouse':
+        REF_DIR = "/media/backup/ref/Ensemble_GRCm38_p6/"  # 20201130 mouse
+    elif TYPE == 'human':
+        REF_DIR = "/media/backup/ref/Ensemble_GRCh38_p13/"  # 20201130 human
+    else:
+        import sys
+        print("[ERROR] - no ref path")
+        sys.exit()
+    print('type : [', TYPE, ']')
 else:
     # DEV
     REF_DIR = "D:/000_WORK/000_reference_path/human/hg38/Splited/"
+    WORK_DIR = "D:/000_WORK/SeoSangYeon/20200907_ClinVar/WORK_DIR/"
 
 PROJECT_NAME = WORK_DIR.split("/")[-2]
 MUT_INFO = "200907_Dominant filter.txt"
 # FILTERED_CDS_INFO = "filtered_hg38_refFlat.txt"
 # FILTERED_CDS_INFO = "filtered_CCDS.current.txt"  # 20201123 mouse
-# FILTERED_CDS_INFO = "filtered_201130_CCDS_mouse_current.txt"  # 20201130 mouse
-# FILTERED_CDS_INFO = "filtered_201130_CCDS_human_current.txt"  # 20201130 human
-FILTERED_CDS_INFO = "filtered_shortest_cdn_CCDS_mouse.txt"  # 20201201 mouse
-# FILTERED_CDS_INFO = "filtered_shortest_cdn_CCDS_human.txt"  # 20201201 human
+# FILTERED_CDS_INFO = "filtered_201130_CCDS_" + TYPE + "_current.txt"  # 20201130
+FILTERED_CDS_INFO = "filtered_shortest_cdn_CCDS_" + TYPE + ".txt"  # 20201201
 RESULT_FILE = "SY_Dominant_result_by_spacer.txt"
 
-OTHOLOG = ['SaCas9', 'SaCas9_KKH', 'SaCas9_NNG', 'St1Cas9', 'Nm1Cas9', 'Nm2Cas9', 'CjCas9']
-PAMS = ['NNGRRT', 'NNNRRT', 'NNG', 'NNRGAA', 'NNNNGATT', 'NNNNCC', 'NNNNRYAC']
-SEQ_F_PAM = [43, 43, 43, 41, 45, 44, 44]
-SEQ_B_PAM = [3, 3, 3, 3, 3, 3, 3]
+# multi_processing_ClinVar_by_all_cds()
+ALL_CDS_INFO = "all_ccds_filtered_201130_CCDS_" + TYPE + "_current.txt"  # 20201217
+
+OTHOLOG = ['SaCas9', 'SaCas9_KKH', 'SaCas9_NNG', 'St1Cas9', 'Nm1Cas9', 'Nm2Cas9', 'CjCas9', 'SauriCas9', 'SauriCas9-KKH']
+PAMS = ['NNGRRT', 'NNNRRT', 'NNG', 'NNRGAA', 'NNNNGATT', 'NNNNCC', 'NNNNRYAC', 'NNGG', 'NNRG']
+SEQ_F_PAM = [43, 43, 43, 41, 45, 44, 44, 43, 43]
+SEQ_B_PAM = [3, 3, 3, 3, 3, 3, 3, 3, 3]
 WIN_SIZE = [60, 60]
 
 RATIO = [0.05, 0.65]
-INIT = [OTHOLOG, PAMS, SEQ_F_PAM, SEQ_B_PAM]
+ADJ_REF_IDX = -1
+INIT = [OTHOLOG, PAMS, SEQ_F_PAM, SEQ_B_PAM, ADJ_REF_IDX]
 INIT_BY_PAM = [
     ['SaCas9', 'NNGRRT', 43, 3, WIN_SIZE, RATIO]
     , ['SaCas9_KKH', 'NNNRRT', 43, 3, WIN_SIZE, RATIO]
@@ -47,11 +59,17 @@ INIT_BY_PAM = [
     , ['Nm1Cas9', 'NNNNGATT', 45, 3, WIN_SIZE, RATIO]
     , ['Nm2Cas9', 'NNNNCC', 44, 3, WIN_SIZE, RATIO]
     , ['CjCas9', 'NNNNRYAC', 44, 3, WIN_SIZE, RATIO]
+    , ['SauriCas9', 'NNGG', 43, 3, WIN_SIZE, RATIO]
+    , ['SauriCas9-KKH', 'NNRG', 43, 3, WIN_SIZE, RATIO]
 ]
 
 TOTAL_CPU = mp.cpu_count()
 MULTI_CNT = int(TOTAL_CPU*0.8)
+
 ############### end setting env #################
+
+def multi_processing_ClinVar_by_all_cds():
+    pass
 
 
 def multi_processing_by_pam_w_whole_gene():
@@ -98,13 +116,13 @@ def multi_processing_by_pam_w_whole_gene():
         # clear ListProxy
         result_list[:] = []
         print("\nstart to make files for ", pam_nm, "\n")
-        util.make_csv(WORK_DIR + "output/cleavage_pos_in_shortest_cds_w_whole_mouse_gene_" + pam_nm + ".txt", header,
+        util.make_csv(WORK_DIR + "output/cleavage_pos_in_shortest_cds_w_whole_" + TYPE + "_gene_" + pam_nm + ".txt", header,
                       sorted_result_list, 0, "\t")
         try:
             print(len(sorted_result_list))
-            if pam_nm in ['SaCas9_NNG']:
+            if pam_nm in ['SaCas9_NNG', 'SauriCas9-KKH']:
                 continue
-            util.make_excel(WORK_DIR + "output/cleavage_pos_in_shortest_cds_w_whole_mouse_gene_" + pam_nm, header,
+            util.make_excel(WORK_DIR + "output/cleavage_pos_in_shortest_cds_w_whole_" + TYPE + "_gene_" + pam_nm, header,
                             sorted_result_list)
         except Exception as err:
             print('[ERROR] during making excel file for ' + pam_nm + '\n', str(err))
@@ -162,7 +180,7 @@ def multi_processing_by_pam_w_mut():
         util.make_excel(WORK_DIR + "output/cleavage_pos_in_cds_w_mut_" + pam_nm, header, sorted_result_list)
 
 
-def multi_processing_for_whole_pam():
+def multi_processing_for_whole_pam_ClinVar():
     logic_prep = LogicPrep.LogicPreps()
     util = Util.Utils()
 
@@ -187,9 +205,10 @@ def multi_processing_for_whole_pam():
     result_list = logic_prep.merge_multi_list(pool_list)
 
     header = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO',
-              'P_REF_SEQ_[' + str(WIN_SIZE[0]) + '], M_REF_SEQ_[' + str(WIN_SIZE[1]) + ']', 'SaCas9+', 'SaCas9-',
-              'SaCas9_KKH+', 'SaCas9_KKH-', 'SaCas9_NNG+', 'SaCas9_NNG-', 'St1Cas9+', 'St1Cas9-', 'Nm1Cas9+',
-              'Nm1Cas9-', 'Nm2Cas9+', 'Nm2Cas9-', 'CjCas9+', 'CjCas9-']
+              'P_REF_SEQ_[' + str(WIN_SIZE[0]) + '], M_REF_SEQ_[' + str(WIN_SIZE[1]) + ']']
+    for pam_nm in OTHOLOG:
+        for strand in ['+', '-']:
+            header.append(pam_nm + strand)
     util.make_excel(WORK_DIR + "output/SY_Dominant_result_by_spacer", header, result_list)
 
 
@@ -210,7 +229,7 @@ def get_seq_by_pam_after_mut(mut_list):
         tmp_arr = []
         tmp_arr.extend(mut_arr)
         chr_num = mut_arr[0]
-        pos = int(mut_arr[1]) - 1
+        pos = int(mut_arr[1]) + ADJ_REF_IDX
         ref_p_seq = mut_arr[3]
         alt_p_seq = mut_arr[4]
 
@@ -355,10 +374,10 @@ def make_filtered_ccds_current_file_by_shortest_cdn():
 
     ccds_list = []
     if SYSTEM_NM == 'Linux':
-        ccds_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/201130_CCDS_human_current.txt", "\t", 0))
+        ccds_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/201130_CCDS_" + TYPE + "_current.txt", "\t", 0))
     else:
         # ccds_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/CCDS.current.txt", "\t", 0)[:3000])
-        ccds_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/201130_CCDS_human_current.txt", "\t", 0))
+        ccds_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/201130_CCDS_" + TYPE + "_current.txt", "\t", 0))
 
     # st plan A : filter out non Public, non Identical
     ccds_list = logic_prep.get_data_with_trgt_strng(ccds_list, 'Public', 5)
@@ -373,18 +392,43 @@ def make_filtered_ccds_current_file_by_shortest_cdn():
               'ExonE_list']
 
     try:
-        os.remove(WORK_DIR + "input/filtered_shortest_cdn_CCDS_human.txt")
+        os.remove(WORK_DIR + "input/filtered_shortest_cdn_CCDS_" + TYPE + ".txt")
     except Exception as err:
         print('os.remove(WORK_DIR + "input/filtered_CCDS.current.txt") : ', str(err))
-    util.make_csv(WORK_DIR + "input/filtered_shortest_cdn_CCDS_human.txt", header, filted_ccds_list, 0, "\t")
+    util.make_csv(WORK_DIR + "input/filtered_shortest_cdn_CCDS_" + TYPE + ".txt", header, filted_ccds_list, 0, "\t")
+
+
+def check_seq_idx():
+    util = Util.Utils()
+
+    # CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+    # POS - 1 = index of .fa sequence
+    # [['1', '1338000', '208047', 'CT', 'C', '.', '.', '"ALLELEID=204306;CLNDISDB=MONDO:MONDO:0014591,MedGen:C4225363,OMIM:616331;CLNDN=Robinow_syndrome,_autosomal_dominant_2;CLNHGVS=NC_000001.11:g.1338001del;CLNREVSTAT=criteria_provided,_single_submitter;CLNSIG=Pathogenic;CLNVC=Deletion;CLNVCSO=SO:0000159;GENEINFO=DVL1:1855;MC=SO:0001589|frameshift_variant;ORIGIN=33;RS=797044837"'],...]
+    mut_list = []
+    if SYSTEM_NM == 'Linux':
+        mut_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/" + MUT_INFO, "\t"))
+    else:
+        mut_list.extend(util.read_csv_ignore_N_line(WORK_DIR + "input/" + MUT_INFO, "\t")[:300])
+
+    for mut_arr in mut_list:
+        chr_num = mut_arr[0]
+        pos = int(mut_arr[1]) + ADJ_REF_IDX
+        ref_seq = mut_arr[3]
+        seq_record = SeqIO.read(REF_DIR + "chr" + chr_num + ".fa", "fasta")
+        print(ref_seq)
+        print(str(seq_record.seq)[pos: pos + len(ref_seq)])
+        print()
+
 
 
 if __name__ == '__main__':
     start_time = time.perf_counter()
     print("start [ " + PROJECT_NAME + " ]>>>>>>>>>>>>>>>>>>")
-    # multi_processing_for_whole_pam()
+    # check_seq_idx()
+    multi_processing_for_whole_pam_ClinVar()
+    multi_processing_ClinVar_by_all_cds()
     # split_multi_processing_for_whole_pam_by_PAM()
-    multi_processing_by_pam_w_whole_gene()
+    # multi_processing_by_pam_w_whole_gene()
     # make_filtered_mouse_ccds_current_file()
     # make_filtered_ccds_current_file_by_shortest_cdn()  # 20201201
     print("::::::::::: %.2f seconds ::::::::::::::" % (time.perf_counter() - start_time))
