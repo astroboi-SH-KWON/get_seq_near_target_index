@@ -100,18 +100,19 @@ class Logics:
         else:
             return False
 
-    def get_matched_pam_p_seq_dict(self, p_seq, pos, win_arr, ref_seq, pam, len_f_pam, len_b_pam):
+    def get_matched_pam_p_seq_dict(self, p_seq, pos, win_arr, pos_seq, pam, len_f_pam, len_b_pam):
         result_dict = {}
         len_pam = len(pam)
-        len_ref_seq = len(ref_seq)
+        len_ref_seq = len(pos_seq)
 
         p_ori_win_f_seq = p_seq[pos - win_arr[0]: pos]
-        p_ori_win_b_seq = p_seq[pos + len(ref_seq): pos + len(ref_seq) + win_arr[1]]
-        p_ori_win_seq = p_ori_win_f_seq + ref_seq + p_ori_win_b_seq
+        p_ori_win_b_seq = p_seq[pos + len(pos_seq): pos + len(pos_seq) + win_arr[1]]
+        p_ori_win_seq = p_ori_win_f_seq + pos_seq + p_ori_win_b_seq
 
         p_first_pam_pos = len(p_ori_win_f_seq) - len_pam + 1
 
-        for i in range(len(p_ori_win_b_seq) + len_ref_seq):
+        # check PAM in only pos_seq part
+        for i in range(len_pam + len_ref_seq - 1):
             p_ref_pam_seq = p_ori_win_seq[i + p_first_pam_pos: i + p_first_pam_pos + len_pam]
             if self.match_SY(0, p_ref_pam_seq, pam):
                 p_seq_f_pam = p_ori_win_seq[i + p_first_pam_pos - len_f_pam: i + p_first_pam_pos]
@@ -123,18 +124,19 @@ class Logics:
 
         return result_dict, p_ori_win_seq
 
-    def get_matched_pam_m_seq_dict(self, m_seq, pos, win_arr, ref_seq, pam, len_f_pam, len_b_pam):
+    def get_matched_pam_m_seq_dict(self, m_seq, pos, win_arr, pos_seq, pam, len_f_pam, len_b_pam):
         result_dict = {}
         len_pam = len(pam)
-        len_ref_seq = len(ref_seq)
+        len_ref_seq = len(pos_seq)
 
         m_ori_win_f_seq = m_seq[pos - win_arr[0]: pos]
-        m_ori_win_b_seq = m_seq[pos + len(ref_seq): pos + len(ref_seq) + win_arr[1]]
-        m_ori_win_seq = m_ori_win_f_seq + ref_seq + m_ori_win_b_seq
+        m_ori_win_b_seq = m_seq[pos + len(pos_seq): pos + len(pos_seq) + win_arr[1]]
+        m_ori_win_seq = m_ori_win_f_seq + pos_seq + m_ori_win_b_seq
 
         m_first_pam_pos = len(m_ori_win_f_seq) - len_pam + 1
 
-        for i in range(len(m_ori_win_b_seq) + len_ref_seq):
+        # check PAM in only pos_seq part
+        for i in range(len_pam + len_ref_seq - 1):
             m_ref_pam_seq = m_ori_win_seq[i + m_first_pam_pos: i + m_first_pam_pos + len_pam]
             if self.match_SY(0, m_ref_pam_seq, pam[::-1]):
                 m_seq_f_pam = m_ori_win_seq[i + m_first_pam_pos + len_pam: i + m_first_pam_pos + len_pam + len_f_pam]
@@ -146,17 +148,18 @@ class Logics:
 
         return result_dict, m_ori_win_seq[::-1]
 
-    def get_matched_pam_clvg_p_seq_dict(self, p_seq, pos, win_arr, ref_seq, pam, len_f_pam, len_b_pam):
+    def get_matched_pam_clvg_p_seq_dict(self, p_seq, pos, win_arr, pos_seq, pam, len_f_pam, len_b_pam):
         result_dict = {}
         len_pam = len(pam)
-        len_ref_seq = len(ref_seq)
+        len_ref_seq = len(pos_seq)
 
         p_ori_win_f_seq = p_seq[pos - win_arr[0]: pos]
-        p_ori_win_b_seq = p_seq[pos + len(ref_seq): pos + len(ref_seq) + win_arr[1]]
-        p_ori_win_seq = p_ori_win_f_seq + ref_seq + p_ori_win_b_seq
+        p_ori_win_b_seq = p_seq[pos + len(pos_seq): pos + len(pos_seq) + win_arr[1]]
+        p_ori_win_seq = p_ori_win_f_seq + pos_seq + p_ori_win_b_seq
 
         p_first_pam_pos = len(p_ori_win_f_seq) - len_pam + 1
 
+        # check PAM in only pos_seq part
         for i in range(len_pam + len_ref_seq - 1):
             p_ref_pam_seq = p_ori_win_seq[i + p_first_pam_pos: i + p_first_pam_pos + len_pam]
             if self.match_SY(0, p_ref_pam_seq, pam):
@@ -171,17 +174,18 @@ class Logics:
 
         return result_dict, p_ori_win_seq
 
-    def get_matched_pam_clvg_m_seq_dict(self, m_seq, pos, win_arr, ref_seq, pam, len_f_pam, len_b_pam):
+    def get_matched_pam_clvg_m_seq_dict(self, m_seq, pos, win_arr, pos_seq, pam, len_f_pam, len_b_pam):
         result_dict = {}
         len_pam = len(pam)
-        len_ref_seq = len(ref_seq)
+        len_ref_seq = len(pos_seq)
 
         m_ori_win_f_seq = m_seq[pos - win_arr[0]: pos]
-        m_ori_win_b_seq = m_seq[pos + len(ref_seq): pos + len(ref_seq) + win_arr[1]]
-        m_ori_win_seq = m_ori_win_f_seq + ref_seq + m_ori_win_b_seq
+        m_ori_win_b_seq = m_seq[pos + len(pos_seq): pos + len(pos_seq) + win_arr[1]]
+        m_ori_win_seq = m_ori_win_f_seq + pos_seq + m_ori_win_b_seq
 
         m_first_pam_pos = len(m_ori_win_f_seq) - len_pam + 1
 
+        # check PAM in only pos_seq part
         for i in range(len_pam + len_ref_seq - 1):
             m_ref_pam_seq = m_ori_win_seq[i + m_first_pam_pos: i + m_first_pam_pos + len_pam]
             if self.match_SY(0, m_ref_pam_seq, pam[::-1]):
