@@ -13,7 +13,7 @@ class Logics:
         self.len_contxt = 22
 
     def complement_char(self, ch):
-        complement_char_dict = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', 'N': 'N'}
+        complement_char_dict = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', 'N': 'N', '.': '.'}
         try:
             return complement_char_dict[ch]
         except:
@@ -560,3 +560,25 @@ class Logics:
         if idx in check_list:
             return True
         return False
+
+    def check_seq_in_cds(self, cds_idx_list, trgt_pos):
+        for cds_idx_arr in cds_idx_list:
+            if trgt_pos in cds_idx_arr:
+                return True
+        return False
+
+    # GeneSym	NMID	Chrom	Strand	Transcript_Start	End	ORFStart	End	#Exon	ExonS_list	ExonE_list
+    # Xkr4	CCDS14803.1	chr1	-	3216021	3671347	3216021	3671347	3	3216021,3421701,3670551,	3216967,3421900,3671347,
+    def get_cds_idx_arr_dict_by_GeneSym(self, cds_info):
+        logic_prep = LogicPrep.LogicPreps()
+
+        result_dict = {}
+        for cds_arr in cds_info:
+            gene_sym = cds_arr[0]
+            start_idx_arr, end_idx_arr = logic_prep.get_orf_strt_end_idx_arr(cds_arr)
+            idx_list = logic_prep.get_idx_num_frm_strt_to_end_list(start_idx_arr, end_idx_arr)
+            if gene_sym in result_dict:
+                result_dict[gene_sym].append(idx_list)
+            else:
+                result_dict.update({gene_sym: [idx_list]})
+        return result_dict

@@ -1,7 +1,7 @@
 # get_seq_near_target_index
 
 
-[Main_SY.py multi_processing_ClinVar_by_all_cds() 관련](./Main_SY.py)
+[Main_SY.py multi_processing_ClinVar_by_all_cds() 관련](./ClinVar_SY.py)
 
  
 multi_processing_ClinVar_by_all_cds()     
@@ -40,7 +40,7 @@ input :
 
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-D:\000_WORK\SeoSangYeon\20200907_ClinVar\20201224_ClinVar_dominant mutations_selective knockout sgRNA design.pptx
+[20201224_ClinVar_dominant mutations_selective knockout sgRNA design.ppt](../../000_WORK/SeoSangYeon/20200907_ClinVar/20201224_ClinVar_dominant mutations_selective knockout sgRNA design.pptx)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     sgRNA design for selective knockout of dominant mutant alleles
     (guide sequence에는 mismatch가 있어도 activity가 어느 정도 유지될 수 있으나, PAM에 위치할 경우 activity가 거의 나타나지 않음을 이용)
@@ -100,7 +100,7 @@ Blue, orange, red (같은 gene 내의 다른 부위에 PAM을 가지는 같은 g
 
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-D:\000_WORK\SeoSangYeon\20200907_ClinVar\20201217_ClinVar_dominant mutations_selective knockout sgRNA design.pptx
+[20201217_ClinVar_dominant mutations_selective knockout sgRNA design.pptx](../../000_WORK/SeoSangYeon/20200907_ClinVar/20201217_ClinVar_dominant mutations_selective knockout sgRNA design.pptx)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 sgRNA design for selective knockout of dominant mutant alleles
 (guide sequence에는 mismatch가 있어도 activity가 어느 정도 유지될 수 있으나, PAM에 위치할 경우 activity가 거의 나타나지 않음을 이용)

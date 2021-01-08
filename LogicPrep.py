@@ -133,14 +133,17 @@ class LogicPreps:
     def get_dict_from_list_by_ele_key(self, data_list, key_idx):
         result_dict = {}
         for val_arr in data_list:
-            if val_arr[key_idx] in result_dict:
-                result_dict[val_arr[key_idx]].append(val_arr)
+            if str(val_arr[key_idx]) in result_dict:
+                result_dict[str(val_arr[key_idx])].append(val_arr)
             else:
-                result_dict.update({val_arr[key_idx]: [val_arr]})
+                result_dict.update({str(val_arr[key_idx]): [val_arr]})
         return result_dict
 
     def get_data_with_trgt_strng(self, ccds_list, trgt_str, idx):
         return [cds_arr for cds_arr in ccds_list if cds_arr[idx] == trgt_str]
+
+    def filter_out_data_with_trgt_strng(self, ccds_list, trgt_str, idx):
+        return [cds_arr for cds_arr in ccds_list if cds_arr[idx] != trgt_str]
 
     def get_highest_ccds_id_among_same_gen_id(self, ccds_list):
         gen_id_dict = {}
@@ -232,3 +235,5 @@ class LogicPreps:
             sorted_ccds_list = self.sort_list_by_ele(ccds_list, -1, False)
             result_list.append(sorted_ccds_list[0][:-1])
         return result_list
+
+

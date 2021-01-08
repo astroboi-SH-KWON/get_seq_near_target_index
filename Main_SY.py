@@ -31,6 +31,8 @@ else:
     REF_DIR = "D:/000_WORK/000_reference_path/human/hg38/Splited/"
     WORK_DIR = "D:/000_WORK/SeoSangYeon/20200907_ClinVar/WORK_DIR/"
 
+IN = 'input/'
+OU = 'output/'
 PROJECT_NAME = WORK_DIR.split("/")[-2]
 MUT_INFO = "200907_Dominant filter.txt"
 # FILTERED_CDS_INFO = "filtered_hg38_refFlat.txt"
@@ -38,9 +40,6 @@ MUT_INFO = "200907_Dominant filter.txt"
 # FILTERED_CDS_INFO = "filtered_201130_CCDS_" + TYPE + "_current.txt"  # 20201130
 FILTERED_CDS_INFO = "filtered_shortest_cdn_CCDS_" + TYPE + ".txt"  # 20201201
 RESULT_FILE = "SY_Dominant_result_by_spacer.txt"
-
-# multi_processing_ClinVar_by_all_cds()
-ALL_CDS_INFO = "all_ccds_filtered_201130_CCDS_" + TYPE + "_current.txt"  # 20201217
 
 OTHOLOG = ['SaCas9', 'SaCas9_KKH', 'SaCas9_NNG', 'St1Cas9', 'Nm1Cas9', 'Nm2Cas9', 'CjCas9', 'SauriCas9', 'SauriCas9-KKH']
 PAMS = ['NNGRRT', 'NNNRRT', 'NNG', 'NNRGAA', 'NNNNGATT', 'NNNNCC', 'NNNNRYAC', 'NNGG', 'NNRG']
@@ -63,13 +62,145 @@ INIT_BY_PAM = [
     , ['SauriCas9-KKH', 'NNRG', 43, 3, WIN_SIZE, RATIO]
 ]
 
+# multi_processing_ClinVar_by_all_cds()
+ALL_CDS_INFO = "all_ccds_filtered_201130_CCDS_mouse_current.txt"  # mouse
+# ALL_CDS_INFO = "all_ccds_filtered_201130_CCDS_human_current.txt"  # human
+ORI_CDS_INFO = "201130_CCDS_mouse_current.txt"  # mouse
+# ORI_CDS_INFO = "201130_CCDS_human_current.txt"  # human
+FILTERED_MUT_INFO = "ClinVar_dominant_mutation_on_CDS.txt"
+INIT_FOR_CLINVAR = [
+    ['SaCas9', 22, 21, 'NNGRRT', 3]
+    , ['SaCas9-KKH', 22, 21, 'NNNRRT', 3]
+    , ['SaCas9-NNG', 22, 21, 'NNG', 3]
+    , ['SauriCas9', 22, 21, 'NNGG', 3]
+    , ['SauriCas9-KKH', 22, 21, 'NNRG', 3]
+    , ['St1Cas9', 22, 19, 'NNRGAA', 3]
+    , ['Nm1Cas9', 22, 23, 'NNNNGATT', 3]
+    , ['Nm2Cas9', 22, 22, 'NNNNCC', 3]
+    , ['CjCas9', 22, 22, 'NNNNRYAC', 3]
+]
+
 TOTAL_CPU = mp.cpu_count()
 MULTI_CNT = int(TOTAL_CPU*0.8)
 
 ############### end setting env #################
 
-def multi_processing_ClinVar_by_all_cds():
-    pass
+
+def get_cds_idx_list():
+    logic = Logic.Logics()
+    logic_prep = LogicPrep.LogicPreps()
+    util = Util.Utils()
+
+    # cds_dict = logic_prep.get_dict_from_list_by_ele_key(
+    #     util.read_csv_ignore_N_line(WORK_DIR + "input/" + ALL_CDS_INFO, "\t"), 2)
+    ccds_list = util.read_csv_ignore_N_line(WORK_DIR + "input/" + ORI_CDS_INFO, "\t", 1)
+    ccds_list = logic_prep.filter_out_data_with_trgt_strng(ccds_list, '-', -2)
+    ccds_hg38_form_list = logic_prep.transform_mouse_ccds_form_to_hg38_refFlat(ccds_list)
+    # util.make_csv(WORK_DIR + 'output/ccds_hg38_form_list.txt', [], ccds_hg38_form_list, deli='\t')
+    cds_dict = logic_prep.get_dict_from_list_by_ele_key(ccds_hg38_form_list, 2)
+
+    cds_info = cds_dict['chr1']
+    cds_idx_list = []
+    for cds_arr in cds_info:
+        start_idx_arr, end_idx_arr = logic_prep.get_orf_strt_end_idx_arr(cds_arr)
+        idx_list = logic_prep.get_idx_num_frm_strt_to_end_list(start_idx_arr, end_idx_arr)
+        cds_idx_list.append(idx_list)
+    print()
+    print(logic.check_seq_in_cds(cds_idx_list, 97104905))
+    util.make_csv(WORK_DIR + 'input/cds_idx_list_.txt', [], cds_idx_list)
+
+
+def get_GRCh38_Regulatory_Build_regulatory_features_by_ClinVar_dominant_mutation_not_on_CDS():
+    clin_var_not_cds_fl_nm = 'ClinVar_dominant_mutation_not_on_CDS.txt'
+    GRCh38_features_fl_nm = 'homo_sapiens.GRCh38.Regulatory_Build.regulatory_features.20190329.gff'
+
+    logic = Logic.Logics()
+    logic_prep = LogicPrep.LogicPreps()
+    util = Util.Utils()
+
+    clin_var_fl = util.read_csv_ignore_N_line(WORK_DIR + IN + clin_var_not_cds_fl_nm, '\t')
+    GRCh38_features_fl = util.read_csv_ignore_N_line(WORK_DIR + IN + GRCh38_features_fl_nm, '\t', n_line=0)
+    GRCh38_features_dict = logic_prep.get_dict_from_list_by_ele_key(GRCh38_features_fl, 0)
+
+    result_dict = {}
+    no_chr_key_list = []
+    for clin_var_arr in clin_var_fl:
+        tmp_clin_var_key = tuple(clin_var_arr[:5])
+        chr_key = clin_var_arr[0]
+        pos = int(clin_var_arr[1])
+        if chr_key in GRCh38_features_dict:
+            result_dict.update({tmp_clin_var_key: []})
+            GRCh38_features_list = GRCh38_features_dict[chr_key]
+            for GRCh38_features_arr in GRCh38_features_list:
+                tmp_type = GRCh38_features_arr[2]
+                tmp_info = GRCh38_features_arr[-1]
+                st_idx = int(GRCh38_features_arr[3])
+                en_idx = int(GRCh38_features_arr[4])
+                if st_idx < pos < en_idx:
+                    result_dict[tmp_clin_var_key].append([tmp_type, tmp_info])
+
+        else:
+            no_chr_key_list.append(tmp_clin_var_key)
+
+    with open(WORK_DIR + OU + 'in_cds.txt', 'w') as in_cds_f:
+        with open(WORK_DIR + OU + 'not_in_cds.txt', 'w') as not_cds_f:
+            for f_key, val_list in result_dict.items():
+                tmp_str = ""
+                tmp_blnk = ""
+                for tmp_f in f_key:
+                    tmp_str = tmp_str + tmp_f + '\t'
+                    tmp_blnk = tmp_blnk + '-' + '\t'
+
+                if len(val_list) == 0:
+                    not_cds_f.write(tmp_str[:-1] + '\n')
+                else:
+                    for idx in range(len(val_list)):
+                        add_str = ""
+                        for tm_f in val_list[idx]:
+                            add_str = add_str + tm_f + '\t'
+
+                        if idx == 0:
+                            in_cds_f.write(tmp_str + add_str[:-1] + '\n')
+                        else:
+                            in_cds_f.write(tmp_blnk + add_str[:-1] + '\n')
+
+    util.make_csv(WORK_DIR + OU + 'no_chr_key_list.txt', [], no_chr_key_list)
+
+
+def make_filtered_out_ClinVar_pos_in_cds_or_not():
+    logic = Logic.Logics()
+    logic_prep = LogicPrep.LogicPreps()
+    util = Util.Utils()
+
+    cds_info = util.read_csv_ignore_N_line(WORK_DIR + "input/" + ALL_CDS_INFO, "\t")
+    cds_dict_by_chr = {}
+    for cds_arr in cds_info:
+        chrom = cds_arr[2]
+        start_idx_arr, end_idx_arr = logic_prep.get_orf_strt_end_idx_arr(cds_arr)
+        idx_list = logic_prep.get_idx_num_frm_strt_to_end_list(start_idx_arr, end_idx_arr)
+        if chrom in cds_dict_by_chr:
+            cds_dict_by_chr[chrom].append(idx_list)
+        else:
+            cds_dict_by_chr.update({chrom: [idx_list]})
+
+    mut_dict = logic_prep.get_dict_from_list_by_ele_key(
+        util.read_csv_ignore_N_line(WORK_DIR + "input/" + MUT_INFO, "\t"), 0)
+
+    not_in_cds_list = []
+    in_cds_list = []
+    for chr_num, mut_list in mut_dict.items():
+        cds_idx_list = cds_dict_by_chr['chr' + chr_num]
+        for mut_arr in mut_list:
+            pos = int(mut_arr[1])
+            tmp_id = int(mut_arr[2])
+            if not logic.check_seq_in_cds(cds_idx_list, pos):
+                not_in_cds_list.append(mut_arr)
+            else:
+                in_cds_list.append(mut_arr)
+    print(len(not_in_cds_list))
+    header = ['#CHROM',	'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO']
+    util.make_csv(WORK_DIR + '/output/ClinVar_dominant_mutation_on_CDS.txt', header, in_cds_list, deli='\t')
+    util.make_csv(WORK_DIR + '/output/ClinVar_dominant_mutation_not_on_CDS.txt', header, not_in_cds_list, deli='\t')
 
 
 def multi_processing_by_pam_w_whole_gene():
@@ -420,13 +551,15 @@ def check_seq_idx():
         print()
 
 
-
 if __name__ == '__main__':
     start_time = time.perf_counter()
     print("start [ " + PROJECT_NAME + " ]>>>>>>>>>>>>>>>>>>")
     # check_seq_idx()
-    multi_processing_for_whole_pam_ClinVar()
-    multi_processing_ClinVar_by_all_cds()
+    # multi_processing_for_whole_pam_ClinVar()
+    # make_filtered_out_ClinVar_pos_in_cds_or_not()
+    # get_cds_idx_list()
+    get_GRCh38_Regulatory_Build_regulatory_features_by_ClinVar_dominant_mutation_not_on_CDS()
+    # multi_processing_ClinVar_by_all_cds()
     # split_multi_processing_for_whole_pam_by_PAM()
     # multi_processing_by_pam_w_whole_gene()
     # make_filtered_mouse_ccds_current_file()
