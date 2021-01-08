@@ -64,6 +64,7 @@ def get_guide_dict_from_alt(p_sq, init_arr, mut_arr):
     alt_p_seq = mut_arr[4]
     len_alt = len(alt_p_seq)
 
+    # 2.3. ClinVar의 정보 (#CHROM, POS)를 기준으로 genome 상에서 mutation position의 주변 sequence를 가져옴 (60 bp + ref + 60 bp)
     p_f_win = p_sq[pos - WIN_SIZE[0]: pos]
     p_b_win = p_sq[pos + len_ref: pos + len_ref + WIN_SIZE[1]]
     p_win_seq_w_ref = p_f_win + ref_p_seq + p_b_win
@@ -138,18 +139,14 @@ def get_seq_by_pam_after_mut_ClinVar(mut_list):
             for mut_arr in tmp_mut_list:
                 pos = int(mut_arr[1]) + ADJ_REF_IDX
                 ref_p_seq = mut_arr[3]
-                alt_p_seq = mut_arr[4]
+                # alt_p_seq = mut_arr[4]
 
                 # 2.3.2. 이 때, ClinVar에서 보여주는 position 정보에 정확히 ref sequence가 있는지 검증하는 과정 필요
-                if not logic.match(0, p_seq[pos: pos + len(ref_p_seq)], ref_p_seq):
+                if p_seq[pos: pos + len(ref_p_seq)] != ref_p_seq:
                     print('2.3.2. 이 때, ClinVar에서 보여주는 position 정보에 정확히 ref sequence가 있는지 검증하는 과정 필요\n', ref_p_seq,
                           ': ref_seq from ClinVar\n', p_seq[pos: pos + len(ref_p_seq)], ': ref_seq from .fa\n',
                           'mut_arr :', str(mut_arr), '\n\n')
                     continue
-
-                # 2.3. ClinVar의 정보 (#CHROM, POS)를 기준으로 genome 상에서 mutation position의 주변 sequence를 가져옴 (60 bp + ref + 60 bp)
-                p_win_seq_w_ref = p_seq[pos - WIN_SIZE[0]: pos + len(ref_p_seq) + WIN_SIZE[1]]
-                m_win_seq_w_ref = m_seq[pos - WIN_SIZE[1]: pos + len(ref_p_seq) + WIN_SIZE[0]]
 
                 # 2.1.2. 해당 filtered ClinVar 정보를 기준으로 각각의 mutation (ID)이 포함되는 CCDS id를 기준으로 해당 gene을 찾음
                 GeneSym_list = []
@@ -159,8 +156,7 @@ def get_seq_by_pam_after_mut_ClinVar(mut_list):
                         continue
                     start_idx_arr, end_idx_arr = logic_prep.get_orf_strt_end_idx_arr(cds_arr)
                     for i in range(len(start_idx_arr)):
-                        # TODO = or not???
-                        if start_idx_arr[i] < pos < end_idx_arr[i]:
+                        if start_idx_arr[i] <= pos <= end_idx_arr[i]:
                             GeneSym_list.append(GeneSym)
                             break
 
@@ -202,8 +198,10 @@ def multi_processing_ClinVar_by_all_cds():
 
     header = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'STRAND', 'REF (2.3에서의 sequence)', 'Guide context (22 nt + guide RNA + PAM + 3nt)']
     for pam_nm_key, rslt_list in result_dict.items():
-        print('make ')
-        util.make_csv(WORK_DIR + OU + pam_nm_key + '.txt', header, rslt_list, deli='\t')
+        # remove pam_nm column
+        fltd_rslt_list = [tmp_arr[:-1] for tmp_arr in rslt_list]
+        print('make result file for', pam_nm_key)
+        util.make_csv(WORK_DIR + OU + pam_nm_key + '_result.txt', header, fltd_rslt_list, deli='\t')
 
 
 def get_guide_set_from_ref(p_sq, m_sq_no_rvrsed, gene_list, cds_dict, init_arr):
