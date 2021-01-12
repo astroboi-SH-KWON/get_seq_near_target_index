@@ -63,11 +63,36 @@ class Logics:
         elif target_char in 'ACGTU':
             if seq_char == target_char:
                 return True
+
+        elif target_char == 'M':
+            if seq_char in 'AC':
+                return True
         elif target_char == 'R':
             if seq_char in 'AG':
                 return True
+        elif target_char == 'W':
+            if seq_char in 'AT':
+                return True
+        elif target_char == 'S':
+            if seq_char in 'CG':
+                return True
         elif target_char == 'Y':
             if seq_char in 'CT':
+                return True
+        elif target_char == 'K':
+            if seq_char in 'GT':
+                return True
+        elif target_char == 'V':
+            if seq_char != 'T':
+                return True
+        elif target_char == 'H':
+            if seq_char != 'G':
+                return True
+        elif target_char == 'D':
+            if seq_char != 'C':
+                return True
+        elif target_char == 'B':
+            if seq_char != 'A':
                 return True
         """
         add more rules of "ACGTU"

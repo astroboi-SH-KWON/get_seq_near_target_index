@@ -29,18 +29,54 @@ ORI_CDS_INFO = "201130_CCDS_human_current.txt"  # human
 MUT_ON_CDS_INFO = "ClinVar_dominant_mutation_on_CDS.txt"
 INIT_FOR_CLINVAR = [
     ['SaCas9', 22, 21, 'NNGRRT', 3]
-    , ['SaCas9-KKH', 22, 21, 'NNNRRT', 3]
-    , ['SaCas9-NNG', 22, 21, 'NNG', 3]
+    , ['SaCas9', 22, 21, 'NNGAAR', 3]
+    , ['SaCas9', 22, 21, 'NNGAAC', 3]
+    , ['SaCas9', 22, 21, 'NNGRGV', 3]
+    , ['SaCas9', 22, 21, 'NNGGAR', 3]
+    , ['SaCas9-KKH', 22, 21, 'NNNAGT', 3]
+    , ['SaCas9-KKH', 22, 21, 'NNVGGT', 3]
+    , ['SaCas9-KKH', 22, 21, 'NNRAAT', 3]
+    , ['SaCas9-KKH', 22, 21, 'NNAGAT', 3]
+    , ['SaCas9-KKH', 22, 21, 'NNCRAT', 3]
+    , ['SaCas9-KKH', 22, 21, 'NNGGAT', 3]
+    , ['SaCas9-KKH', 22, 21, 'NNTGGT', 3]
+    , ['SaCas9-KKH', 22, 21, 'NNGARR', 3]
+    , ['SaCas9-KKH', 22, 21, 'NNGAAC', 3]
+    , ['SaCas9-KKH', 22, 21, 'NNTAAT', 3]
+    , ['SaCas9-KKH', 22, 21, 'NNGCGT', 3]
+    , ['SaCas9-NNG', 22, 21, 'NNGH', 3]
+    , ['SaCas9-NNG', 22, 21, 'NNGG', 3]
     , ['SauriCas9', 22, 21, 'NNGG', 3]
+    , ['SauriCas9', 22, 21, 'NNGA', 3]
     , ['SauriCas9-KKH', 22, 21, 'NNRG', 3]
+    , ['SauriCas9-KKH', 22, 21, 'NNCG', 3]
+    , ['SauriCas9-KKH', 22, 21, 'NNVA', 3]
     , ['St1Cas9', 22, 19, 'NNRGAA', 3]
-    , ['Nm1Cas9', 22, 23, 'NNNNGATT', 3]
-    , ['Nm2Cas9', 22, 22, 'NNNNCC', 3]
-    , ['CjCas9', 22, 22, 'NNNNRYAC', 3]
+    , ['St1Cas9', 22, 19, 'NNAGGA', 3]
+    , ['St1Cas9', 22, 19, 'NNABCA', 3]
+    , ['St1Cas9', 22, 19, 'NNAWAA', 3]
+    , ['St1Cas9', 22, 19, 'NNGGGA', 3]
+    , ['St1Cas9', 22, 19, 'NNAGAB', 3]
+    , ['St1Cas9', 22, 19, 'NNCGAA', 3]
+    , ['Nm1Cas9', 22, 23, 'NNNNGATTD', 3]
+    , ['Nm1Cas9', 22, 23, 'NNNNGACTW', 3]
+    , ['Nm1Cas9', 22, 23, 'NNNNGYTTA', 3]
+    , ['Nm1Cas9', 22, 23, 'NNNNGYTTT', 3]
+    , ['Nm1Cas9', 22, 23, 'NNNNGATTC', 3]
+    , ['Nm1Cas9', 22, 23, 'NNNNGTCTA', 3]
+    , ['Nm1Cas9', 22, 23, 'NNNNGATAG', 3]
+    , ['Nm1Cas9', 22, 23, 'NNNNGAGTA', 3]
+    , ['Nm2Cas9', 22, 22, 'NNNNCCA', 3]
+    , ['Nm2Cas9', 22, 22, 'NNNNCCB', 3]
+    , ['CjCas9', 22, 22, 'NNNNACAC', 3]
+    , ['CjCas9', 22, 22, 'NNNNRTAC', 3]
+    , ['CjCas9', 22, 22, 'NNNNGCAC', 3]
+    , ['CjCas9', 22, 22, 'NNNNACAT', 3]
+    , ['CjCas9', 22, 22, 'NNNNGTAT', 3]
 ]
 WIN_SIZE = [60, 60]
 TOTAL_CPU = mp.cpu_count()
-MULTI_CNT = int(TOTAL_CPU*0.8)
+MULTI_CNT = int(TOTAL_CPU*0.5)
 
 all_cds_info = Util.Utils().read_csv_ignore_N_line(WORK_DIR + IN + ALL_CDS_INFO, deli_str='\t')
 CDS_DICT = LogicPrep.LogicPreps().get_dict_from_list_by_ele_key(all_cds_info, 2)
@@ -193,8 +229,11 @@ def multi_processing_ClinVar_by_all_cds():
     pool_list = pool.map(get_seq_by_pam_after_mut_ClinVar, splited_clinvar_mut_info)
 
     result_list = logic_prep.merge_multi_list(pool_list)
+    pool.close()
+    pool_list[:] = []
 
     result_dict = logic_prep.get_dict_from_list_by_ele_key(result_list, -1)
+    result_list.clear()
 
     header = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'STRAND', 'REF (2.3에서의 sequence)', 'Guide context (22 nt + guide RNA + PAM + 3nt)']
     for pam_nm_key, rslt_list in result_dict.items():
@@ -222,11 +261,11 @@ def get_guide_set_from_ref(p_sq, m_sq_no_rvrsed, gene_list, cds_dict, init_arr):
                 pam_fr_p_sq = p_sq[clv_idx + 3: clv_idx + 3 + len_pam]
                 pam_fr_m_sq = m_sq_no_rvrsed[clv_idx - 3 - len_pam: clv_idx - 3]
 
-                if logic.match(0, pam_fr_p_sq, pam_rule):
+                if logic.match_SY(0, pam_fr_p_sq, pam_rule):
                     guide_seq = p_sq[clv_idx + 3 - len_guide: clv_idx + 3]
                     result_set.add(guide_seq)
 
-                if logic.match(0, pam_fr_m_sq, pam_rule[::-1]):
+                if logic.match_SY(0, pam_fr_m_sq, pam_rule[::-1]):
                     guide_seq = m_sq_no_rvrsed[clv_idx - 3: clv_idx - 3 + len_guide]
                     result_set.add(guide_seq[::-1])
 
@@ -251,7 +290,7 @@ def get_guide_dict_from_ref(p_sq, m_sq_no_rvrsed, gene_list, cds_dict, init_arr)
                 pam_fr_p_sq = p_sq[clv_idx + 3: clv_idx + 3 + len_pam]
                 pam_fr_m_sq = m_sq_no_rvrsed[clv_idx - 3 - len_pam: clv_idx - 3]
 
-                if logic.match(0, pam_fr_p_sq, pam_rule):
+                if logic.match_SY(0, pam_fr_p_sq, pam_rule):
                     f_guide = p_sq[clv_idx + 3 - len_guide - len_f_guide: clv_idx + 3 - len_guide]
                     guide_seq = p_sq[clv_idx + 3 - len_guide: clv_idx + 3]
                     b_pam = p_sq[clv_idx + 3 + len_pam: clv_idx + 3 + len_pam + len_b_pam]
@@ -263,7 +302,7 @@ def get_guide_dict_from_ref(p_sq, m_sq_no_rvrsed, gene_list, cds_dict, init_arr)
                     else:
                         result_dict.update({guide_seq: [tmp_arr]})
 
-                if logic.match(0, pam_fr_m_sq, pam_rule[::-1]):
+                if logic.match_SY(0, pam_fr_m_sq, pam_rule[::-1]):
                     f_guide = m_sq_no_rvrsed[clv_idx - 3 + len_guide: clv_idx - 3 + len_guide + len_f_guide]
                     guide_seq = m_sq_no_rvrsed[clv_idx - 3: clv_idx - 3 + len_guide]
                     b_pam = m_sq_no_rvrsed[clv_idx - 3 - len_pam - len_b_pam: clv_idx - 3 - len_pam]
