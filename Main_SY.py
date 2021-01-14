@@ -50,16 +50,64 @@ WIN_SIZE = [60, 60]
 RATIO = [0.05, 0.65]
 ADJ_REF_IDX = -1
 INIT = [OTHOLOG, PAMS, SEQ_F_PAM, SEQ_B_PAM, ADJ_REF_IDX]
+# INIT_BY_PAM = [
+#     ['SaCas9', 'NNGRRT', 43, 3, WIN_SIZE, RATIO]
+#     , ['SaCas9_KKH', 'NNNRRT', 43, 3, WIN_SIZE, RATIO]
+#     , ['SaCas9_NNG', 'NNG', 43, 3, WIN_SIZE, RATIO]
+#     , ['St1Cas9', 'NNRGAA', 41, 3, WIN_SIZE, RATIO]
+#     , ['Nm1Cas9', 'NNNNGATT', 45, 3, WIN_SIZE, RATIO]
+#     , ['Nm2Cas9', 'NNNNCC', 44, 3, WIN_SIZE, RATIO]
+#     , ['CjCas9', 'NNNNRYAC', 44, 3, WIN_SIZE, RATIO]
+#     , ['SauriCas9', 'NNGG', 43, 3, WIN_SIZE, RATIO]
+#     , ['SauriCas9-KKH', 'NNRG', 43, 3, WIN_SIZE, RATIO]
+# ]
+
 INIT_BY_PAM = [
-    ['SaCas9', 'NNGRRT', 43, 3, WIN_SIZE, RATIO]
-    , ['SaCas9_KKH', 'NNNRRT', 43, 3, WIN_SIZE, RATIO]
-    , ['SaCas9_NNG', 'NNG', 43, 3, WIN_SIZE, RATIO]
-    , ['St1Cas9', 'NNRGAA', 41, 3, WIN_SIZE, RATIO]
-    , ['Nm1Cas9', 'NNNNGATT', 45, 3, WIN_SIZE, RATIO]
-    , ['Nm2Cas9', 'NNNNCC', 44, 3, WIN_SIZE, RATIO]
-    , ['CjCas9', 'NNNNRYAC', 44, 3, WIN_SIZE, RATIO]
+['SaCas9', 'NNGRRT', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9', 'NNGAAR', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9', 'NNGAAC', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9', 'NNGRGV', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9', 'NNGGAR', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9-KKH', 'NNNAGT', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9-KKH', 'NNVGGT', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9-KKH', 'NNRAAT', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9-KKH', 'NNAGAT', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9-KKH', 'NNCRAT', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9-KKH', 'NNGGAT', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9-KKH', 'NNTGGT', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9-KKH', 'NNGARR', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9-KKH', 'NNGAAC', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9-KKH', 'NNTAAT', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9-KKH', 'NNGCGT', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9-NNG', 'NNGH', 43, 3, WIN_SIZE, RATIO]
+    , ['SaCas9-NNG', 'NNGG', 43, 3, WIN_SIZE, RATIO]
     , ['SauriCas9', 'NNGG', 43, 3, WIN_SIZE, RATIO]
+    , ['SauriCas9', 'NNGA', 43, 3, WIN_SIZE, RATIO]
     , ['SauriCas9-KKH', 'NNRG', 43, 3, WIN_SIZE, RATIO]
+    , ['SauriCas9-KKH', 'NNCG', 43, 3, WIN_SIZE, RATIO]
+    , ['SauriCas9-KKH', 'NNVA', 43, 3, WIN_SIZE, RATIO]
+    , ['St1Cas9', 'NNRGAA', 41, 3, WIN_SIZE, RATIO]
+    , ['St1Cas9', 'NNAGGA', 41, 3, WIN_SIZE, RATIO]
+    , ['St1Cas9', 'NNABCA', 41, 3, WIN_SIZE, RATIO]
+    , ['St1Cas9', 'NNAWAA', 41, 3, WIN_SIZE, RATIO]
+    , ['St1Cas9', 'NNGGGA', 41, 3, WIN_SIZE, RATIO]
+    , ['St1Cas9', 'NNAGAB', 41, 3, WIN_SIZE, RATIO]
+    , ['St1Cas9', 'NNCGAA', 41, 3, WIN_SIZE, RATIO]
+    , ['Nm1Cas9', 'NNNNGATTD', 45, 3, WIN_SIZE, RATIO]
+    , ['Nm1Cas9', 'NNNNGACTW', 45, 3, WIN_SIZE, RATIO]
+    , ['Nm1Cas9', 'NNNNGYTTA', 45, 3, WIN_SIZE, RATIO]
+    , ['Nm1Cas9', 'NNNNGYTTT', 45, 3, WIN_SIZE, RATIO]
+    , ['Nm1Cas9', 'NNNNGATTC', 45, 3, WIN_SIZE, RATIO]
+    , ['Nm1Cas9', 'NNNNGTCTA', 45, 3, WIN_SIZE, RATIO]
+    , ['Nm1Cas9', 'NNNNGATAG', 45, 3, WIN_SIZE, RATIO]
+    , ['Nm1Cas9', 'NNNNGAGTA', 45, 3, WIN_SIZE, RATIO]
+    , ['Nm2Cas9',  'NNNNCCA', 44, 3, WIN_SIZE, RATIO]
+    , ['Nm2Cas9',  'NNNNCCB', 44, 3, WIN_SIZE, RATIO]
+    , ['CjCas9', 'NNNNACAC', 44, 3, WIN_SIZE, RATIO]
+    , ['CjCas9', 'NNNNRTAC', 44, 3, WIN_SIZE, RATIO]
+    , ['CjCas9', 'NNNNGCAC', 44, 3, WIN_SIZE, RATIO]
+    , ['CjCas9', 'NNNNACAT', 44, 3, WIN_SIZE, RATIO]
+    , ['CjCas9', 'NNNNGTAT', 44, 3, WIN_SIZE, RATIO]
 ]
 
 # multi_processing_ClinVar_by_all_cds()
@@ -246,17 +294,17 @@ def multi_processing_by_pam_w_whole_gene():
         sorted_result_list = logic_prep.sort_list_by_ele(result_list, 0, False)
         # clear ListProxy
         result_list[:] = []
-        print("\nstart to make files for ", pam_nm, "\n")
-        util.make_csv(WORK_DIR + "output/cleavage_pos_in_shortest_cds_w_whole_" + TYPE + "_gene_" + pam_nm + ".txt", header,
+        print("\nstart to make files for ", pam_nm, init[1] + "\n")
+        util.make_csv(WORK_DIR + "output/cleavage_pos_in_shortest_cds_w_whole_" + TYPE + "_gene_" + pam_nm + '_' + init[1] + ".txt", header,
                       sorted_result_list, 0, "\t")
-        try:
-            print(len(sorted_result_list))
-            if pam_nm in ['SaCas9_NNG', 'SauriCas9-KKH']:
-                continue
-            util.make_excel(WORK_DIR + "output/cleavage_pos_in_shortest_cds_w_whole_" + TYPE + "_gene_" + pam_nm, header,
-                            sorted_result_list)
-        except Exception as err:
-            print('[ERROR] during making excel file for ' + pam_nm + '\n', str(err))
+        # try:
+        #     print(len(sorted_result_list))
+        #     if pam_nm in ['SaCas9_NNG', 'SauriCas9-KKH']:
+        #         continue
+        #     util.make_excel(WORK_DIR + "output/cleavage_pos_in_shortest_cds_w_whole_" + TYPE + "_gene_" + pam_nm, header,
+        #                     sorted_result_list)
+        # except Exception as err:
+        #     print('[ERROR] during making excel file for ' + pam_nm + '\n', str(err))
 
 
 def multi_processing_by_pam_w_mut():
@@ -558,10 +606,10 @@ if __name__ == '__main__':
     # multi_processing_for_whole_pam_ClinVar()
     # make_filtered_out_ClinVar_pos_in_cds_or_not()
     # get_cds_idx_list()
-    get_GRCh38_Regulatory_Build_regulatory_features_by_ClinVar_dominant_mutation_not_on_CDS()
+    # get_GRCh38_Regulatory_Build_regulatory_features_by_ClinVar_dominant_mutation_not_on_CDS()
     # multi_processing_ClinVar_by_all_cds()
     # split_multi_processing_for_whole_pam_by_PAM()
-    # multi_processing_by_pam_w_whole_gene()
+    multi_processing_by_pam_w_whole_gene()
     # make_filtered_mouse_ccds_current_file()
     # make_filtered_ccds_current_file_by_shortest_cdn()  # 20201201
     print("::::::::::: %.2f seconds ::::::::::::::" % (time.perf_counter() - start_time))

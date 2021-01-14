@@ -425,7 +425,7 @@ class Logics:
                     trgt_m_pam = m_seq[clvg_site - self.len_clvg - len(pam_seq): clvg_site - self.len_clvg][::-1]
 
                     # check + strand
-                    if self.match(0, trgt_p_pam, pam_seq):
+                    if self.match_SY(0, trgt_p_pam, pam_seq):
                         trgt_full_p_seq = p_seq[clvg_site + self.len_clvg - len_f_pam: clvg_site + self.len_clvg + len(
                             pam_seq) + len_b_pam]
                         trgt_p_seq = p_seq[
@@ -437,7 +437,7 @@ class Logics:
                              trgt_p_seq[- len_b_pam:], trgt_full_p_seq, pos_ratio_cds])
 
                     # check - strand
-                    if self.match(0, trgt_m_pam, pam_seq):
+                    if self.match_SY(0, trgt_m_pam, pam_seq):
                         trgt_full_m_seq = m_seq[clvg_site - self.len_clvg - len(
                             pam_seq) - len_b_pam: clvg_site - self.len_clvg + len_f_pam][::-1]
                         trgt_m_seq = m_seq[clvg_site - self.len_clvg - len(
