@@ -78,7 +78,6 @@ class Utils:
             result_list.extend(val_list)
         return result_list
 
-
     # conda install -c anaconda xlrd
     def get_sheet_names(self, path):
         df = pd.read_excel(path, None)

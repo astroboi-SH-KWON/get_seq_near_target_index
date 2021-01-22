@@ -1,6 +1,4 @@
 from Bio import SeqIO
-from Bio import pairwise2
-from Bio.SubsMat.MatrixInfo import blosum62
 
 import LogicPrep
 import Util
@@ -13,7 +11,7 @@ class Logics:
         self.len_contxt = 22
 
     def complement_char(self, ch):
-        complement_char_dict = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', 'N': 'N', '.': '.'}
+        complement_char_dict = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', 'N': 'N'}
         try:
             return complement_char_dict[ch]
         except:
@@ -26,6 +24,7 @@ class Logics:
             try:
                 comp_seq += self.complement_char(ch)
             except:
+                print(trgt_seq, 'make_complement_string')
                 raise Exception
         return comp_seq
 

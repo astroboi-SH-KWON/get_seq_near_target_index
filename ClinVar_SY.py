@@ -98,6 +98,9 @@ def get_guide_dict_from_alt(p_sq, init_arr, mut_arr):
     ref_p_seq = mut_arr[3]
     len_ref = len(ref_p_seq)
     alt_p_seq = mut_arr[4]
+    # alt_p_seq == '.' ==> ''
+    if alt_p_seq == '.':
+        alt_p_seq = ''
     len_alt = len(alt_p_seq)
 
     # 2.3. ClinVar의 정보 (#CHROM, POS)를 기준으로 genome 상에서 mutation position의 주변 sequence를 가져옴 (60 bp + ref + 60 bp)
