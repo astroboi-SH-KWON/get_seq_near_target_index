@@ -27,53 +27,19 @@ ADJ_REF_IDX = -1
 ALL_CDS_INFO = "all_ccds_filtered_201130_CCDS_human_current.txt"  # human
 ORI_CDS_INFO = "201130_CCDS_human_current.txt"  # human
 MUT_ON_CDS_INFO = "ClinVar_dominant_mutation_on_CDS.txt"
+
 INIT_FOR_CLINVAR = [
-    ['SaCas9', 22, 21, 'NNGRRT', 3]
-    , ['SaCas9', 22, 21, 'NNGAAR', 3]
-    , ['SaCas9', 22, 21, 'NNGAAC', 3]
-    , ['SaCas9', 22, 21, 'NNGRGV', 3]
-    , ['SaCas9', 22, 21, 'NNGGAR', 3]
-    , ['SaCas9-KKH', 22, 21, 'NNNAGT', 3]
-    , ['SaCas9-KKH', 22, 21, 'NNVGGT', 3]
-    , ['SaCas9-KKH', 22, 21, 'NNRAAT', 3]
-    , ['SaCas9-KKH', 22, 21, 'NNAGAT', 3]
-    , ['SaCas9-KKH', 22, 21, 'NNCRAT', 3]
-    , ['SaCas9-KKH', 22, 21, 'NNGGAT', 3]
-    , ['SaCas9-KKH', 22, 21, 'NNTGGT', 3]
-    , ['SaCas9-KKH', 22, 21, 'NNGARR', 3]
-    , ['SaCas9-KKH', 22, 21, 'NNGAAC', 3]
-    , ['SaCas9-KKH', 22, 21, 'NNTAAT', 3]
-    , ['SaCas9-KKH', 22, 21, 'NNGCGT', 3]
-    , ['SaCas9-NNG', 22, 21, 'NNGH', 3]
-    , ['SaCas9-NNG', 22, 21, 'NNGG', 3]
-    , ['SauriCas9', 22, 21, 'NNGG', 3]
-    , ['SauriCas9', 22, 21, 'NNGA', 3]
-    , ['SauriCas9-KKH', 22, 21, 'NNRG', 3]
-    , ['SauriCas9-KKH', 22, 21, 'NNCG', 3]
-    , ['SauriCas9-KKH', 22, 21, 'NNVA', 3]
-    , ['St1Cas9', 22, 19, 'NNRGAA', 3]
-    , ['St1Cas9', 22, 19, 'NNAGGA', 3]
-    , ['St1Cas9', 22, 19, 'NNABCA', 3]
-    , ['St1Cas9', 22, 19, 'NNAWAA', 3]
-    , ['St1Cas9', 22, 19, 'NNGGGA', 3]
-    , ['St1Cas9', 22, 19, 'NNAGAB', 3]
-    , ['St1Cas9', 22, 19, 'NNCGAA', 3]
-    , ['Nm1Cas9', 22, 23, 'NNNNGATTD', 3]
-    , ['Nm1Cas9', 22, 23, 'NNNNGACTW', 3]
-    , ['Nm1Cas9', 22, 23, 'NNNNGYTTA', 3]
-    , ['Nm1Cas9', 22, 23, 'NNNNGYTTT', 3]
-    , ['Nm1Cas9', 22, 23, 'NNNNGATTC', 3]
-    , ['Nm1Cas9', 22, 23, 'NNNNGTCTA', 3]
-    , ['Nm1Cas9', 22, 23, 'NNNNGATAG', 3]
-    , ['Nm1Cas9', 22, 23, 'NNNNGAGTA', 3]
-    , ['Nm2Cas9', 22, 22, 'NNNNCCA', 3]
-    , ['Nm2Cas9', 22, 22, 'NNNNCCB', 3]
-    , ['CjCas9', 22, 22, 'NNNNACAC', 3]
-    , ['CjCas9', 22, 22, 'NNNNRTAC', 3]
-    , ['CjCas9', 22, 22, 'NNNNGCAC', 3]
-    , ['CjCas9', 22, 22, 'NNNNACAT', 3]
-    , ['CjCas9', 22, 22, 'NNNNGTAT', 3]
+    ['SaCas9', 22, 21, ['NNGRRT', 'NNGAAR', 'NNGAAC', 'NNGRGV', 'NNGGAR'], 3]
+    , ['SaCas9-KKH', 22, 21, ['NNNAGT', 'NNVGGT', 'NNRAAT', 'NNAGAT', 'NNCRAT', 'NNGGAT', 'NNTGGT', 'NNGARR', 'NNGAAC', 'NNTAAT', 'NNGCGT'], 3]
+    , ['SaCas9-NNG', 22, 21, ['NNGH', 'NNGG'], 3]
+    , ['SauriCas9', 22, 21, ['NNGG', 'NNGA'], 3]
+    , ['SauriCas9-KKH', 22, 21, ['NNRG', 'NNCG', 'NNVA'], 3]
+    , ['St1Cas9', 22, 19, ['NNRGAA', 'NNAGGA', 'NNABCA', 'NNAWAA', 'NNGGGA', 'NNAGAB', 'NNCGAA'], 3]
+    , ['Nm1Cas9', 22, 23, ['NNNNGATTD', 'NNNNGACTW', 'NNNNGYTTA', 'NNNNGYTTT', 'NNNNGATTC', 'NNNNGTCTA', 'NNNNGATAG', 'NNNNGAGTA'], 3]
+    , ['Nm2Cas9', 22, 22, ['NNNNCCA', 'NNNNCCB'], 3]
+    , ['CjCas9', 22, 22, ['NNNNACAC', 'NNNNRTAC', 'NNNNGCAC', 'NNNNACAT', 'NNNNGTAT'], 3]
 ]
+
 WIN_SIZE = [60, 60]
 TOTAL_CPU = mp.cpu_count()
 MULTI_CNT = int(TOTAL_CPU*0.5)
@@ -90,8 +56,7 @@ def get_guide_dict_from_alt(p_sq, init_arr, mut_arr):
 
     len_f_guide = init_arr[1]
     len_guide = init_arr[2]
-    pam_rule = init_arr[3]
-    len_pam = len(pam_rule)
+    pam_rule_arr = init_arr[3]
     len_b_pam = init_arr[4]
 
     pos = int(mut_arr[1]) + ADJ_REF_IDX
@@ -109,39 +74,41 @@ def get_guide_dict_from_alt(p_sq, init_arr, mut_arr):
     p_win_seq_w_ref = p_f_win + ref_p_seq + p_b_win
     p_win_seq_w_alt = p_f_win + alt_p_seq + p_b_win
 
-    first_pam_pos = len(p_f_win) - len_pam + 1
+    for pam_rule in pam_rule_arr:
+        len_pam = len(pam_rule)
+        first_pam_pos = len(p_f_win) - len_pam + 1
 
-    # check PAM in only pos_seq part
-    for i in range(len_pam + len_alt - 1):
-        p_pam_seq = p_win_seq_w_alt[i + first_pam_pos: i + first_pam_pos + len_pam]
-        m_pam_seq = logic.make_complement_string(p_pam_seq)
+        # check PAM in only pos_seq part
+        for i in range(len_pam + len_alt - 1):
+            p_pam_seq = p_win_seq_w_alt[i + first_pam_pos: i + first_pam_pos + len_pam]
+            m_pam_seq = logic.make_complement_string(p_pam_seq)
 
-        if logic.match_SY(0, p_pam_seq, pam_rule):
-            f_guide = p_win_seq_w_alt[i + first_pam_pos - len_guide - len_f_guide: i + first_pam_pos - len_guide]
-            guide_seq = p_win_seq_w_alt[i + first_pam_pos - len_guide: i + first_pam_pos]
-            b_pam = p_win_seq_w_alt[i + first_pam_pos + len_pam: i + first_pam_pos + len_pam + len_b_pam]
+            if logic.match_SY(0, p_pam_seq, pam_rule):
+                f_guide = p_win_seq_w_alt[i + first_pam_pos - len_guide - len_f_guide: i + first_pam_pos - len_guide]
+                guide_seq = p_win_seq_w_alt[i + first_pam_pos - len_guide: i + first_pam_pos]
+                b_pam = p_win_seq_w_alt[i + first_pam_pos + len_pam: i + first_pam_pos + len_pam + len_b_pam]
 
-            # STRAND, REF (2.3에서의 sequence), Guide context (22 nt + guide RNA + PAM + 3nt)
-            tmp_arr = ['+', p_win_seq_w_ref, f_guide + guide_seq + p_pam_seq + b_pam]
-            if guide_seq in result_dict:
-                result_dict[guide_seq].append(tmp_arr)
-            else:
-                result_dict.update({guide_seq: [tmp_arr]})
+                # STRAND, REF (2.3에서의 sequence), Guide context (22 nt + guide RNA + PAM + 3nt)
+                tmp_arr = ['+', p_win_seq_w_ref, f_guide + guide_seq + p_pam_seq + b_pam]
+                if guide_seq in result_dict:
+                    result_dict[guide_seq].append(tmp_arr)
+                else:
+                    result_dict.update({guide_seq: [tmp_arr]})
 
-        if logic.match_SY(0, m_pam_seq, pam_rule[::-1]):
-            m_win_seq_w_alt = logic.make_complement_string(p_win_seq_w_alt)
-            f_guide = m_win_seq_w_alt[
-                      i + first_pam_pos + len_pam + len_guide: i + first_pam_pos + len_pam + len_guide + len_f_guide]
-            guide_seq = m_win_seq_w_alt[i + first_pam_pos + len_pam: i + first_pam_pos + len_pam + len_guide]
-            b_pam = m_win_seq_w_alt[i + first_pam_pos - len_b_pam: i + first_pam_pos]
+            if logic.match_SY(0, m_pam_seq, pam_rule[::-1]):
+                m_win_seq_w_alt = logic.make_complement_string(p_win_seq_w_alt)
+                f_guide = m_win_seq_w_alt[
+                          i + first_pam_pos + len_pam + len_guide: i + first_pam_pos + len_pam + len_guide + len_f_guide]
+                guide_seq = m_win_seq_w_alt[i + first_pam_pos + len_pam: i + first_pam_pos + len_pam + len_guide]
+                b_pam = m_win_seq_w_alt[i + first_pam_pos - len_b_pam: i + first_pam_pos]
 
-            # STRAND, REF (2.3에서의 sequence), Guide context (22 nt + guide RNA + PAM + 3nt)
-            tmp_arr = ['-', logic.make_complement_string(p_win_seq_w_ref)[::-1],
-                       (b_pam + m_pam_seq + guide_seq + f_guide)[::-1]]
-            if guide_seq[::-1] in result_dict:
-                result_dict[guide_seq[::-1]].append(tmp_arr)
-            else:
-                result_dict.update({guide_seq[::-1]: [tmp_arr]})
+                # STRAND, REF (2.3에서의 sequence), Guide context (22 nt + guide RNA + PAM + 3nt)
+                tmp_arr = ['-', logic.make_complement_string(p_win_seq_w_ref)[::-1],
+                           (b_pam + m_pam_seq + guide_seq + f_guide)[::-1]]
+                if guide_seq[::-1] in result_dict:
+                    result_dict[guide_seq[::-1]].append(tmp_arr)
+                else:
+                    result_dict.update({guide_seq[::-1]: [tmp_arr]})
 
     return result_dict
 
@@ -253,24 +220,27 @@ def get_guide_set_from_ref(p_sq, m_sq_no_rvrsed, gene_list, cds_dict, init_arr):
 
     # len_f_guide = init_arr[1]
     len_guide = init_arr[2]
-    pam_rule = init_arr[3]
-    len_pam = len(pam_rule)
+    pam_rule_arr = init_arr[3]
     # len_b_pam = init_arr[4]
 
     for gen_nm in gene_list:
         cds_idx_list_arr = cds_dict[gen_nm]
         for cds_idx_list in cds_idx_list_arr:
             for clv_idx in cds_idx_list:
-                pam_fr_p_sq = p_sq[clv_idx + 3: clv_idx + 3 + len_pam]
-                pam_fr_m_sq = m_sq_no_rvrsed[clv_idx - 3 - len_pam: clv_idx - 3]
 
-                if logic.match_SY(0, pam_fr_p_sq, pam_rule):
-                    guide_seq = p_sq[clv_idx + 3 - len_guide: clv_idx + 3]
-                    result_set.add(guide_seq)
+                for pam_rule in pam_rule_arr:
+                    len_pam = len(pam_rule)
 
-                if logic.match_SY(0, pam_fr_m_sq, pam_rule[::-1]):
-                    guide_seq = m_sq_no_rvrsed[clv_idx - 3: clv_idx - 3 + len_guide]
-                    result_set.add(guide_seq[::-1])
+                    pam_fr_p_sq = p_sq[clv_idx + 3: clv_idx + 3 + len_pam]
+                    pam_fr_m_sq = m_sq_no_rvrsed[clv_idx - 3 - len_pam: clv_idx - 3]
+
+                    if logic.match_SY(0, pam_fr_p_sq, pam_rule):
+                        guide_seq = p_sq[clv_idx + 3 - len_guide: clv_idx + 3]
+                        result_set.add(guide_seq)
+
+                    if logic.match_SY(0, pam_fr_m_sq, pam_rule[::-1]):
+                        guide_seq = m_sq_no_rvrsed[clv_idx - 3: clv_idx - 3 + len_guide]
+                        result_set.add(guide_seq[::-1])
 
     return result_set
 
