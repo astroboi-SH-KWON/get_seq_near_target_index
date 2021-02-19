@@ -11,8 +11,8 @@ import LogicPrep
 ############### start to set env ################
 WORK_DIR = os.getcwd() + "/"
 SYSTEM_NM = platform.system()
-TYPE = 'mouse'
-# TYPE = 'human'
+# TYPE = 'mouse'
+TYPE = 'human'
 if SYSTEM_NM == 'Linux':
     # REAL
     # REF_DIR = "/media/backup/ref/hg38/"
@@ -111,8 +111,8 @@ INIT_BY_PAM = [
 ]
 
 # multi_processing_ClinVar_by_all_cds()
-ALL_CDS_INFO = "all_ccds_filtered_201130_CCDS_mouse_current.txt"  # mouse
-# ALL_CDS_INFO = "all_ccds_filtered_201130_CCDS_human_current.txt"  # human
+# ALL_CDS_INFO = "all_ccds_filtered_201130_CCDS_mouse_current.txt"  # mouse
+ALL_CDS_INFO = "all_ccds_filtered_201130_CCDS_human_current.txt"  # human
 ORI_CDS_INFO = "201130_CCDS_mouse_current.txt"  # mouse
 # ORI_CDS_INFO = "201130_CCDS_human_current.txt"  # human
 FILTERED_MUT_INFO = "ClinVar_dominant_mutation_on_CDS.txt"
@@ -130,7 +130,7 @@ INIT_FOR_CLINVAR = [
 
 TOTAL_CPU = mp.cpu_count()
 MULTI_CNT = int(TOTAL_CPU*0.8)
-
+ADJ_REF_IDX = -1
 ############### end setting env #################
 
 
@@ -239,7 +239,7 @@ def make_filtered_out_ClinVar_pos_in_cds_or_not():
     for chr_num, mut_list in mut_dict.items():
         cds_idx_list = cds_dict_by_chr['chr' + chr_num]
         for mut_arr in mut_list:
-            pos = int(mut_arr[1])
+            pos = int(mut_arr[1]) + ADJ_REF_IDX
             tmp_id = int(mut_arr[2])
             if not logic.check_seq_in_cds(cds_idx_list, pos):
                 not_in_cds_list.append(mut_arr)
@@ -247,8 +247,8 @@ def make_filtered_out_ClinVar_pos_in_cds_or_not():
                 in_cds_list.append(mut_arr)
     print(len(not_in_cds_list))
     header = ['#CHROM',	'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO']
-    util.make_csv(WORK_DIR + '/output/ClinVar_dominant_mutation_on_CDS.txt', header, in_cds_list, deli='\t')
-    util.make_csv(WORK_DIR + '/output/ClinVar_dominant_mutation_not_on_CDS.txt', header, not_in_cds_list, deli='\t')
+    util.make_csv(WORK_DIR + '/input/ClinVar_dominant_mutation_on_CDS.txt', header, in_cds_list, deli='\t')
+    util.make_csv(WORK_DIR + '/input/ClinVar_dominant_mutation_not_on_CDS.txt', header, not_in_cds_list, deli='\t')
 
 
 def multi_processing_by_pam_w_whole_gene():
@@ -604,12 +604,12 @@ if __name__ == '__main__':
     print("start [ " + PROJECT_NAME + " ]>>>>>>>>>>>>>>>>>>")
     # check_seq_idx()
     # multi_processing_for_whole_pam_ClinVar()
-    # make_filtered_out_ClinVar_pos_in_cds_or_not()
+    make_filtered_out_ClinVar_pos_in_cds_or_not()
     # get_cds_idx_list()
     # get_GRCh38_Regulatory_Build_regulatory_features_by_ClinVar_dominant_mutation_not_on_CDS()
     # multi_processing_ClinVar_by_all_cds()
     # split_multi_processing_for_whole_pam_by_PAM()
-    multi_processing_by_pam_w_whole_gene()
+    # multi_processing_by_pam_w_whole_gene()
     # make_filtered_mouse_ccds_current_file()
     # make_filtered_ccds_current_file_by_shortest_cdn()  # 20201201
     print("::::::::::: %.2f seconds ::::::::::::::" % (time.perf_counter() - start_time))
