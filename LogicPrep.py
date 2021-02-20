@@ -58,7 +58,7 @@ class LogicPreps:
         for idx in range(len(start_idx_arr)):
             nxt_idx = int(start_idx_arr[idx])
             end_idx = int(end_idx_arr[idx])
-            result_list.extend([tmp_idx for tmp_idx in range(nxt_idx, end_idx)])
+            result_list.extend([tmp_idx for tmp_idx in range(nxt_idx, end_idx + 1)])
         return result_list
 
     def get_seq_by_idx_arr(self, full_seq, start_idx_arr, end_idx_arr):
