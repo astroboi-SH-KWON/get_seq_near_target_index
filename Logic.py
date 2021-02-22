@@ -606,3 +606,33 @@ class Logics:
             else:
                 result_dict.update({gene_sym: [idx_list]})
         return result_dict
+
+    def is_on_cds(self, clvg_site, gene_list, cds_dict):
+        for gen_nm in gene_list:
+            cds_idx_list_arr = cds_dict[gen_nm]
+            for cds_idx_list in cds_idx_list_arr:
+                if clvg_site in cds_idx_list:
+                    return True
+        return False
+
+    # STRAND, REF (2.3에서의 sequence), Guide context (22 nt + guide RNA + PAM + 3nt)
+    def is_alt_guide_in_ref_seq(self, init_arr, val_arr):
+        len_f_guide = init_arr[1]
+        len_guide = init_arr[2]
+        pam_rule_arr = init_arr[3]
+        len_b_pam = init_arr[4]
+
+        ref_seq = val_arr[1]
+        cntxt_seq = val_arr[2]
+
+        for pam_seq in pam_rule_arr:
+            len_pam = len(pam_seq)
+            for i in range(len_guide, len(ref_seq - len_pam)):
+                pam_fr_ref = ref_seq[i: i + len_pam]
+                if self.match_SY(0, pam_fr_ref, pam_seq):
+                    guide_fr_ref = ref_seq[i - len_guide: i]
+                    guide_fr_cntxt = cntxt_seq[len_f_guide: len_f_guide + len_guide]
+                    if guide_fr_cntxt == guide_fr_ref:
+                        return True
+        return False
+

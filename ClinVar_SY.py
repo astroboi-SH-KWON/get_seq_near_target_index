@@ -42,7 +42,7 @@ INIT_FOR_CLINVAR = [
 
 WIN_SIZE = [60, 60]
 TOTAL_CPU = mp.cpu_count()
-MULTI_CNT = int(TOTAL_CPU*0.5)
+MULTI_CNT = int(TOTAL_CPU*0.9)
 
 all_cds_info = Util.Utils().read_csv_ignore_N_line(WORK_DIR + IN + ALL_CDS_INFO, deli_str='\t')
 CDS_DICT = LogicPrep.LogicPreps().get_dict_from_list_by_ele_key(all_cds_info, 2)
@@ -50,7 +50,39 @@ all_cds_info.clear()
 ############### end setting env #################
 
 
-def get_guide_dict_from_alt(p_sq, init_arr, mut_arr):
+def get_guide_set_from_ref(p_sq, m_sq_no_rvrsed, gene_list, cds_dict, init_arr):
+    logic = Logic.Logics()
+
+    result_set = set()
+
+    # len_f_guide = init_arr[1]
+    len_guide = init_arr[2]
+    pam_rule_arr = init_arr[3]
+    # len_b_pam = init_arr[4]
+
+    for gen_nm in gene_list:
+        cds_idx_list_arr = cds_dict[gen_nm]
+        for cds_idx_list in cds_idx_list_arr:
+            for clv_idx in cds_idx_list:
+
+                for pam_rule in pam_rule_arr:
+                    len_pam = len(pam_rule)
+
+                    pam_fr_p_sq = p_sq[clv_idx + 3: clv_idx + 3 + len_pam]
+                    pam_fr_m_sq = m_sq_no_rvrsed[clv_idx - 3 - len_pam: clv_idx - 3]
+
+                    if logic.match_SY(0, pam_fr_p_sq, pam_rule):
+                        guide_seq = p_sq[clv_idx + 3 - len_guide: clv_idx + 3]
+                        result_set.add(guide_seq)
+
+                    if logic.match_SY(0, pam_fr_m_sq, pam_rule[::-1]):
+                        guide_seq = m_sq_no_rvrsed[clv_idx - 3: clv_idx - 3 + len_guide]
+                        result_set.add(guide_seq[::-1])
+
+    return result_set
+
+
+def get_guide_dict_from_alt(p_sq, init_arr, mut_arr, gene_list, cds_dict):
     logic = Logic.Logics()
     result_dict = {}
 
@@ -77,13 +109,18 @@ def get_guide_dict_from_alt(p_sq, init_arr, mut_arr):
     for pam_rule in pam_rule_arr:
         len_pam = len(pam_rule)
         first_pam_pos = len(p_f_win) - len_pam + 1
+        p_clvg_first_pos = pos - len_pam + 1 - 3
+        m_clvg_first_pos = pos + 1 + 3
 
         # check PAM in only pos_seq part
         for i in range(len_pam + len_alt - 1):
             p_pam_seq = p_win_seq_w_alt[i + first_pam_pos: i + first_pam_pos + len_pam]
             m_pam_seq = logic.make_complement_string(p_pam_seq)
 
-            if logic.match_SY(0, p_pam_seq, pam_rule):
+            p_clvg_pos = p_clvg_first_pos + i
+            m_clvg_pos = m_clvg_first_pos + i
+
+            if logic.match_SY(0, p_pam_seq, pam_rule) and logic.is_on_cds(p_clvg_pos, gene_list, cds_dict):
                 f_guide = p_win_seq_w_alt[i + first_pam_pos - len_guide - len_f_guide: i + first_pam_pos - len_guide]
                 guide_seq = p_win_seq_w_alt[i + first_pam_pos - len_guide: i + first_pam_pos]
                 b_pam = p_win_seq_w_alt[i + first_pam_pos + len_pam: i + first_pam_pos + len_pam + len_b_pam]
@@ -95,7 +132,7 @@ def get_guide_dict_from_alt(p_sq, init_arr, mut_arr):
                 else:
                     result_dict.update({guide_seq: [tmp_arr]})
 
-            if logic.match_SY(0, m_pam_seq, pam_rule[::-1]):
+            if logic.match_SY(0, m_pam_seq, pam_rule[::-1]) and logic.is_on_cds(m_clvg_pos, gene_list, cds_dict):
                 m_win_seq_w_alt = logic.make_complement_string(p_win_seq_w_alt)
                 f_guide = m_win_seq_w_alt[
                           i + first_pam_pos + len_pam + len_guide: i + first_pam_pos + len_pam + len_guide + len_f_guide]
@@ -134,10 +171,6 @@ def get_seq_by_pam_after_mut_ClinVar(mut_list):
 
         for init_arr in INIT_FOR_CLINVAR:
             pam_nm = init_arr[0]
-            # len_f_guide = init_arr[1]
-            # len_guide = init_arr[2]
-            # pam_rule = init_arr[3]
-            # len_b_pam = init_arr[4]
 
             # #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
             # POS - 1 = index of .fa sequence
@@ -165,14 +198,19 @@ def get_seq_by_pam_after_mut_ClinVar(mut_list):
                         if start_idx_arr[i] <= pos <= end_idx_arr[i]:
                             GeneSym_list.append(GeneSym)
                             break
+                if len(GeneSym_list) == 0:break
 
                 ref_guide_set = get_guide_set_from_ref(p_seq, m_seq, GeneSym_list, cds_dict_by_GeneSym, init_arr)
-                alt_guide_dict = get_guide_dict_from_alt(p_seq, init_arr, mut_arr)
+                alt_guide_dict = get_guide_dict_from_alt(p_seq, init_arr, mut_arr, GeneSym_list, cds_dict_by_GeneSym)
 
                 # 2.5. 2.4에서 가져온 sequence 중 guide를 기준 (주변의 sequence나 PAM은 포함하면 안됨)으로 2.1.에서 가져온 guide와 중복되는 것들은 제거하여 최종의 output을 만듦
                 for guide_key, val_list in alt_guide_dict.items():
                     if guide_key not in ref_guide_set:
                         for val_arr in val_list:
+                            # filter out if alt_guide in ref_seq
+                            if logic.is_alt_guide_in_ref_seq(init_arr, val_arr):
+                                break
+
                             tm_arr = []
                             tm_arr.extend(mut_arr)
                             tm_arr.extend(val_arr)
@@ -211,38 +249,6 @@ def multi_processing_ClinVar_by_all_cds():
         fltd_rslt_list = [tmp_arr[:-1] for tmp_arr in rslt_list]
         print('make result file for', pam_nm_key)
         util.make_csv(WORK_DIR + OU + pam_nm_key + '_result.txt', header, fltd_rslt_list, deli='\t')
-
-
-def get_guide_set_from_ref(p_sq, m_sq_no_rvrsed, gene_list, cds_dict, init_arr):
-    logic = Logic.Logics()
-
-    result_set = set()
-
-    # len_f_guide = init_arr[1]
-    len_guide = init_arr[2]
-    pam_rule_arr = init_arr[3]
-    # len_b_pam = init_arr[4]
-
-    for gen_nm in gene_list:
-        cds_idx_list_arr = cds_dict[gen_nm]
-        for cds_idx_list in cds_idx_list_arr:
-            for clv_idx in cds_idx_list:
-
-                for pam_rule in pam_rule_arr:
-                    len_pam = len(pam_rule)
-
-                    pam_fr_p_sq = p_sq[clv_idx + 3: clv_idx + 3 + len_pam]
-                    pam_fr_m_sq = m_sq_no_rvrsed[clv_idx - 3 - len_pam: clv_idx - 3]
-
-                    if logic.match_SY(0, pam_fr_p_sq, pam_rule):
-                        guide_seq = p_sq[clv_idx + 3 - len_guide: clv_idx + 3]
-                        result_set.add(guide_seq)
-
-                    if logic.match_SY(0, pam_fr_m_sq, pam_rule[::-1]):
-                        guide_seq = m_sq_no_rvrsed[clv_idx - 3: clv_idx - 3 + len_guide]
-                        result_set.add(guide_seq[::-1])
-
-    return result_set
 
 
 def get_guide_dict_from_ref(p_sq, m_sq_no_rvrsed, gene_list, cds_dict, init_arr):
@@ -290,8 +296,41 @@ def get_guide_dict_from_ref(p_sq, m_sq_no_rvrsed, gene_list, cds_dict, init_arr)
     return result_dict
 
 
+def test():
+    logic = Logic.Logics()
+    logic_prep = LogicPrep.LogicPreps()
+
+    # pos_arr = [26766456, 26772501]
+    pos_arr = [33441359]
+    chr_key = '6'
+
+    cds_info = CDS_DICT["chr" + chr_key]
+    cds_dict_by_GeneSym = logic.get_cds_idx_arr_dict_by_GeneSym(cds_info)
+
+    GeneSym_list = []
+    for ori_pos in pos_arr:
+        pos = ori_pos + ADJ_REF_IDX
+
+        for cds_arr in cds_info:
+            GeneSym = cds_arr[0]
+            # if GeneSym in GeneSym_list:
+            #     continue
+            start_idx_arr, end_idx_arr = logic_prep.get_orf_strt_end_idx_arr(cds_arr)
+            for i in range(len(start_idx_arr)):
+                if start_idx_arr[i] <= pos <= end_idx_arr[i]:
+                    GeneSym_list.append(GeneSym)
+                    # break
+
+    print(GeneSym_list)
+
+    print(logic.make_complement_string('CCACACTGGGGCTCCCACTACTGCGAGGAGTGACCCACGAAGGCCACAGAGATGGCCGGGGCTTCGGTGAAGGTGGCGGTGCGGGTCCGCCCCTTCAATTCCCGGGAAATGAGCCGTGACTC')[::-1])
+    print('CCACACTGGGGCTCCCACTACTGCGAGGAGTGACCCACGAAGGCCACAGAGATGGCCGGGGCTTCGGTGAAGGTGGCGGTGCGGGTCCGCCCCTTCAATTCCCGGGAAATGAGCCGTGACTC'[::-1])
+
+
+
 if __name__ == '__main__':
     start_time = time.perf_counter()
     print("start [ " + PROJECT_NAME + " ]>>>>>>>>>>>>>>>>>>")
     multi_processing_ClinVar_by_all_cds()
+    # test()
     print("::::::::::: %.2f seconds ::::::::::::::" % (time.perf_counter() - start_time))
