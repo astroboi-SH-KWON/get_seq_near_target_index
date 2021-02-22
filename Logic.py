@@ -620,14 +620,14 @@ class Logics:
         len_f_guide = init_arr[1]
         len_guide = init_arr[2]
         pam_rule_arr = init_arr[3]
-        len_b_pam = init_arr[4]
+        # len_b_pam = init_arr[4]
 
         ref_seq = val_arr[1]
         cntxt_seq = val_arr[2]
 
         for pam_seq in pam_rule_arr:
             len_pam = len(pam_seq)
-            for i in range(len_guide, len(ref_seq - len_pam)):
+            for i in range(len_guide, len(ref_seq) - len_pam):
                 pam_fr_ref = ref_seq[i: i + len_pam]
                 if self.match_SY(0, pam_fr_ref, pam_seq):
                     guide_fr_ref = ref_seq[i - len_guide: i]
